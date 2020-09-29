@@ -32,6 +32,9 @@ for _path in _search_path:
     if _libr is not None:
         break
 
+if _libr is None:
+    raise ImportError("Libr is not found on your system.")
+
 def _setup_prototype(lib, fname, restype, *argtypes):
     getattr(lib, fname).restype = restype
     getattr(lib, fname).argtypes = argtypes
