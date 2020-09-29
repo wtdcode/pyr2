@@ -2,3 +2,4 @@
 *.egg-info
 build
 r2cmd/r2libr
+dist
