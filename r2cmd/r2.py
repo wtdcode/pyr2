@@ -15,10 +15,10 @@ except KeyError:
     raise ImportError(f"Your platform {sys.platform} is not supported!")
 
 _search_path = [Path(os.path.dirname(os.path.abspath(__file__))) / "r2libr",
-                '',
-                distutils.sysconfig.get_python_lib(),
-                "/usr/local/lib/" if sys.platform == 'darwin' else '/usr/lib64',
-                os.getenv('PATH', '')]
+                Path(''),
+                Path(distutils.sysconfig.get_python_lib()),
+                Path("/usr/local/lib/") if sys.platform == 'darwin' else Path('/usr/lib64'),
+                Path(os.getenv('PATH', ''))]
 
 def _load_libr(directory: Path):
     libr_path = directory / "main" / _libr_name
