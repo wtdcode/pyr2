@@ -1,1 +1,1 @@
-from r2 import R2
+from .r2 import R2
