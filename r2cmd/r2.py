@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 _libr_name_dict = { 'darwin': 'libr_main.dylib',
-                    'win32': 'libr_main.dll',
+                    'win32': 'r_main.dll',
                     'linux': 'libr_main.so',
                     'linux2': 'libr_main.so' }
 try:
