@@ -46,6 +46,22 @@ PACKAGE_DIRS = [
     'r2libr/flag/d/*'
 ]
 
+def detect_python_on_windows():
+    try:
+        p = subprocess.run('python -c "import sys;print(sys.version_info.major)"', capture_output=True)
+        output = p.stdout.decode("utf-8")
+        if int(output) == 3:
+            return ["python"]
+    except FileNotFoundError:
+        pass
+    try:
+        p = subprocess.run('py -3 --version')
+        if p.returncode == 0:
+            return ["py", "-3"]
+    except FileNotFoundError:
+        pass
+    return None
+
 def clean_builds():
     shutil.rmtree(Path(ROOT_DIR) / "build")
     shutil.rmtree(Path(ROOT_DIR) / "r2cmd" / "r2libr")
@@ -74,7 +90,13 @@ def build_radare2():
     else:
         BACKEND = os.getenv("BACKEND", "ninja")
 
-    args = ["./sys/meson.py"]
+    args = []
+    if sys.platform == "win32":
+        py = detect_python_on_windows()
+        if py is None:
+            raise RuntimeError("Can't find a python in your path!")
+        args += py
+    args += ["./sys/meson.py"]
     if not DEBUG:
         args += ["--release"]
     args += ["--local"]
