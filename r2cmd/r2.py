@@ -27,7 +27,7 @@ def _load_libr_win(directory: Path):
         while changed:
             changed = False
             for p in directory.iterdir():
-                if p.is_file() and p.name.endswith("dll"):
+                if p.is_file() and p.name.endswith("dylib"):
                     try:
                         dll = ctypes.cdll.LoadLibrary(str(p))
                         if p.name == _libr_name:
@@ -69,7 +69,7 @@ PFILE = ctypes.POINTER(ctypes.c_uint64)
 _setup_prototype(_libr, "r_core_new", PRCORE)
 _setup_prototype(_libr, "r_core_init", ctypes.c_bool, PRCORE)
 _setup_prototype(_libr, "r_core_free", PRCORE)
-_setup_prototype(_libr, "r_core_parse_radare2rc", ctypes.c_bool, PRCORE)
+_setup_prototype(_libr, "r_core_parse_radare2rc", None, PRCORE)
 _setup_prototype(_libr, "r_core_file_open", PFILE, PRCORE, ctypes.c_char_p, ctypes.c_int, ctypes.c_uint64)
 _setup_prototype(_libr, "r_core_file_close", ctypes.c_int, PRCORE, PFILE)
 _setup_prototype(_libr, "r_core_bin_load", ctypes.c_bool, PRCORE, ctypes.c_char_p, ctypes.c_uint64)
