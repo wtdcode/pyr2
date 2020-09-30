@@ -21,7 +21,7 @@ _search_path = [Path(os.path.dirname(os.path.abspath(__file__))) / "r2libr",
                 Path(os.getenv('PATH', ''))]
 
 def _load_libr(directory: Path):
-    libr_path = directory / "main" / _libr_name
+    libr_path = directory / _libr_name
     try:
         return ctypes.cdll.LoadLibrary(str(libr_path))
     except OSError:
