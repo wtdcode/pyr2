@@ -53,7 +53,7 @@ jobs:
         rd /s /q "C:\Program Files\Git\mingw64\bin"
       
     - name: Build distribution 📦
-      shell: bash 
+      shell: cmd
       run: |
           python setup.py bdist_wheel
   
