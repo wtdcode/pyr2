@@ -185,13 +185,16 @@ class bdist_egg(_bdist_egg):
         self.run_command('build')
         return _bdist_egg.run(self)
 
+with open(Path(ROOT_DIR) / "README.md", "r+") as f:
+    long_description = f.read()
+
 setuptools.setup(
-    name="pyr2cmd",
-    version="0.0.1",
+    name="pyr2",
+    version="1.0.0",
     author="mio",
     author_email="mio@lazym.io",
-    description="pyr2cmd",
-    long_description="pyr2cmd",
+    description="Yet anohter radare2 python bindings.",
+    long_description=long_description,
     url="https://github.com/wtdcode/pyr2cmd",
     packages=setuptools.find_packages(),
     classifiers=[
