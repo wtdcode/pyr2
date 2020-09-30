@@ -20,14 +20,16 @@ _search_path = [Path(os.path.dirname(os.path.abspath(__file__))) / "r2libr",
 
 # Workaround for dll dependencies.
 # In Py3.8, we have a better way to do this.
-def _load_libr_win(directory: Path):
+def _load_libr_all(directory: Path):
     if (directory / _libr_name).exists():
         changed = True
         loaded = set()
         while changed:
             changed = False
             for p in directory.iterdir():
-                if p.is_file() and p.name.endswith("dylib"):
+                if p in loaded:
+                    continue
+                if p.is_file() and p.name.endswith("dll"):
                     try:
                         dll = ctypes.cdll.LoadLibrary(str(p))
                         if p.name == _libr_name:
@@ -50,7 +52,7 @@ def _load_libr(directory: Path):
 
 for _path in _search_path:
     if sys.platform == "win32":
-        _libr = _load_libr_win(_path)
+        _libr = _load_libr_all(_path)
     else:
         _libr = _load_libr(_path)
     if _libr is not None:
