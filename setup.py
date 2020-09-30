@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 RADARE2_DIR = Path(ROOT_DIR) / "radare2"
-LIBS_DIR = Path(ROOT_DIR) / "r2cmd" / "r2libr"
+LIBS_DIR = Path(ROOT_DIR) / "r2" / "libr"
 
 def detect_python_on_windows():
     try:
@@ -34,7 +34,7 @@ def detect_python_on_windows():
 
 def clean_builds():
     shutil.rmtree(Path(ROOT_DIR) / "build")
-    shutil.rmtree(Path(ROOT_DIR) / "r2cmd" / "r2libr")
+    shutil.rmtree(Path(ROOT_DIR) / "r2" / "libr")
 
 def radare2_exists():
     return (Path(ROOT_DIR) / "radare2" / ".git").exists()
@@ -123,7 +123,7 @@ def build_radare2():
     os.chdir(RADARE2_DIR)
 
     DEBUG = os.getenv("DEBUG", "")
-    BUILDDIR = os.getenv("R2BUILDDIR", "pyr2cmdbuild")
+    BUILDDIR = os.getenv("R2BUILDDIR", "pyr2build")
     PREFIX = os.getenv("R2PREFIX", str(Path(ROOT_DIR) / "radare2" / "pyr2installdir"))
     if sys.platform == "win32":
         BACKEND = os.getenv("BACKEND", "vs2017")
@@ -195,7 +195,7 @@ setuptools.setup(
     author_email="mio@lazym.io",
     description="Yet anohter radare2 python bindings.",
     long_description=long_description,
-    url="https://github.com/wtdcode/pyr2cmd",
+    url="https://github.com/wtdcode/pyr2",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3"
@@ -210,7 +210,7 @@ setuptools.setup(
     include_package_data=True,
     is_pure=False,
     package_data= {
-        "r2cmd" : ['r2libr/*']
+        "r2" : ['libr/*']
     }
 )
 

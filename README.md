@@ -34,7 +34,7 @@ pip3 install .
 ## Example
 
 ```python
-from r2cmd import R2
+from r2 import R2
 
 r2 = R2()
 fh = r2.r_core_open_file("/bin/ls", 0b101, 0)

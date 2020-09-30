@@ -14,8 +14,8 @@ try:
 except KeyError:
     raise ImportError(f"Your platform {sys.platform} is not supported!")
 
-_search_path = [Path(os.path.dirname(os.path.abspath(__file__))) / "r2libr",
-                Path(''),
+_search_path = [Path(os.path.dirname(os.path.abspath(__file__))) / "libr",
+                Path('') / "libr",
                 Path("/usr/local/lib/") if sys.platform == 'darwin' else Path('/usr/lib64')]
 
 # Workaround for dll dependencies.
