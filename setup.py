@@ -5,12 +5,16 @@ import subprocess
 import shutil
 import struct
 import re
+import platform
+from distutils.util import get_platform
 from distutils.command.build import build as _build
 from distutils.command.sdist import sdist as _sdist
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.develop import develop as _develop
 from distutils.command.clean import clean as _clean
 from pathlib import Path
+
+IS_64BITS = platform.architecture()[0] == '64bit'
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 RADARE2_DIR = Path(ROOT_DIR) / "radare2"
@@ -184,6 +188,27 @@ class bdist_egg(_bdist_egg):
     def run(self):
         self.run_command('build')
         return _bdist_egg.run(self)
+
+# https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it
+# https://github.com/unicorn-engine/unicorn/blob/198e432a1d7edbed6f4726acc42c50c3a4141b6b/bindings/python/setup.py#L229
+if 'bdist_wheel' in sys.argv and '--plat-name' not in sys.argv:
+    idx = sys.argv.index('bdist_wheel') + 1
+    sys.argv.insert(idx, '--plat-name')
+    name = get_platform()
+    if 'linux' in name:
+        # linux_* platform tags are disallowed because the python ecosystem is fubar
+        # linux builds should be built in the centos 5 vm for maximum compatibility
+        # see https://github.com/pypa/manylinux
+        # see also https://github.com/angr/angr-dev/blob/master/bdist.sh
+        sys.argv.insert(idx + 1, 'manylinux1_' + platform.machine())
+    elif 'mingw' in name:
+        if IS_64BITS:
+            sys.argv.insert(idx + 1, 'win_amd64')
+        else:
+            sys.argv.insert(idx + 1, 'win32')
+    else:
+        # https://www.python.org/dev/peps/pep-0425/
+        sys.argv.insert(idx + 1, name.replace('.', '_').replace('-', '_'))
 
 with open(Path(ROOT_DIR) / "README.md", "r+") as f:
     long_description = f.read()
