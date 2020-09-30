@@ -13,38 +13,6 @@ from pathlib import Path
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 RADARE2_DIR = Path(ROOT_DIR) / "radare2"
 LIBS_DIR = Path(ROOT_DIR) / "r2cmd" / "r2libr"
-PACKAGE_DIRS = [
-    'r2libr/fs/*',
-    'r2libr/anal/*',
-    'r2libr/crypto/*',
-    'r2libr/io/*',
-    'r2libr/core/*',
-    'r2libr/asm/*',
-    'r2libr/socket/*',
-    'r2libr/config/*',
-    'r2libr/bp/*',
-    'r2libr/debug/*',
-    'r2libr/bin/*',
-    'r2libr/cons/*',
-    'r2libr/reg/*',
-    'r2libr/parse/*',
-    'r2libr/syscall/*',
-    'r2libr/magic/*',
-    'r2libr/lang/*',
-    'r2libr/egg/*',
-    'r2libr/flag/*',
-    'r2libr/search/*',
-    'r2libr/main/*',
-    'r2libr/hash/*',
-    'r2libr/util/*',
-    'r2libr/anal/d/*',
-    'r2libr/asm/d/*',
-    'r2libr/bin/d/*',
-    'r2libr/cons/d/*',
-    'r2libr/syscall/d/*',
-    'r2libr/magic/d/*',
-    'r2libr/flag/d/*'
-]
 
 def detect_python_on_windows():
     try:
@@ -85,6 +53,7 @@ def build_radare2():
 
     DEBUG = os.getenv("DEBUG", "")
     BUILDDIR = os.getenv("R2BUILDDIR", "pyr2cmdbuild")
+    PREFIX = os.getenv("R2PREFIX", str(Path(ROOT_DIR) / "radare2" / "pyr2installdir"))
     if sys.platform == "win32":
         BACKEND = os.getenv("BACKEND", "vs2017")
     else:
@@ -103,12 +72,23 @@ def build_radare2():
     args += ["--dir", BUILDDIR]
     args += ["--shared"]
     args += ["--backend", BACKEND]
+    args += ["--prefix", PREFIX]
+    args += ["--install"]
 
     subprocess.call(args)
-    libr_dir = Path(ROOT_DIR) / "radare2" / BUILDDIR / "libr"
     if LIBS_DIR.exists():
         shutil.rmtree(LIBS_DIR)
-    shutil.copytree(libr_dir, LIBS_DIR, ignore=shutil.ignore_patterns("*.o"))
+    os.makedirs(LIBS_DIR, exist_ok=True)
+
+    lib_install_dir = Path(PREFIX) / "lib"
+    glob = {
+        "linux" : "*.so",
+        "win32" : "*.dll",
+        "darwin" : "*.dylib"
+    }.get(sys.platform, "*.so")
+    for p in lib_install_dir.rglob(glob):
+        if p.is_file():
+            shutil.copy(p, LIBS_DIR)
     os.chdir(ROOT_DIR) 
 
 
@@ -154,7 +134,7 @@ setuptools.setup(
     include_package_data=True,
     is_pure=False,
     package_data= {
-        "r2cmd" : PACKAGE_DIRS
+        "r2cmd" : ['r2libr/*']
     }
 )
 
