@@ -3,6 +3,8 @@ import sys
 import os
 import subprocess
 import shutil
+import struct
+import re
 from distutils.command.build import build as _build
 from distutils.command.sdist import sdist as _sdist
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
@@ -43,6 +45,75 @@ def meson_exists():
         return True
     except ImportError:
         return False
+
+# Meson seems not to play well with macOS and radare2
+# assumes that users will install the whole project to system.
+# So we have to rewite all lib load path for our bindings.
+# Refs:
+# - https://github.com/mesonbuild/meson/issues/2121
+def rewrite_dyld_path(dylib: Path):
+    def _read_until_zero(fp):
+        cur = fp.tell()
+        s = b""
+        ch = fp.read(1)
+        while ch != b'\x00' and ch != b'':
+            s += ch
+            ch = fp.read(1)
+        fp.seek(cur, 0)
+        return s.decode("utf-8")
+    def _parse_libr_name(path):
+        result = re.findall(r"(libr_[^\.]*\.dylib$)", path)
+        if len(result) == 0:
+            return None
+        else:   
+            return result[0]
+    def _verbose_call(*args, **kwargs):
+        print(f"Calling: {args[0]}")
+        return subprocess.call(*args, **kwargs)
+    with open(dylib, "rb+") as f:
+        magic = f.read(4)
+        if magic != b'\xcf\xfa\xed\xfe':
+            return
+        _, _, _, load_num = struct.unpack("<IIII", f.read(16))
+
+        # Skip file header
+        f.seek(0x20, 0)
+
+        for _ in range(load_num):
+            section_start_pos = f.tell()
+            section_header = f.read(8)
+            if len(section_header) != 8:
+                break
+            cmd, size = struct.unpack("<II", section_header)
+            # LC_ID_DYLIB
+            if cmd == 0xD:
+                offset, = struct.unpack("<I", f.read(4))
+                f.seek(section_start_pos + offset, 0)
+                id_dylib = _read_until_zero(f)
+                lib_name = _parse_libr_name(id_dylib)
+                if lib_name is not None:
+                    print(f"Patching ID_DYLIB {id_dylib} for {str(dylib)}")
+                    _verbose_call(["install_name_tool", "-id", f"@loader_path/{lib_name}", str(dylib)])
+            # LC_LOAD_DYLIB
+            elif cmd==0xC:
+                offset, = struct.unpack("<I", f.read(4))
+                f.seek(section_start_pos + offset, 0)
+                load_dylib = _read_until_zero(f)
+                lib_name = _parse_libr_name(load_dylib)
+
+                # Why not @rpath?
+                # Some refs:
+                # - http://developer.apple.com/library/mac/#documentation/Darwin/Reference/Manpages/man1/dyld.1.html
+                # - https://stackoverflow.com/questions/16826922/what-path-does-loader-path-resolve-to
+                # - https://www.mikeash.com/pyblog/friday-qa-2009-11-06-linking-and-install-names.html
+                # Some notes for myself:
+                #     The @rpath of the dylib comes from the application which loads it, not the dylib itself.
+                if lib_name is not None:
+                    print(f"Patching LOAD_DYLIB {lib_name} for {str(dylib)}")
+                    _verbose_call(["install_name_tool", "-change", load_dylib, f"@loader_path/{lib_name}", str(dylib)])
+            f.seek(section_start_pos + size, 0)
+    return
+
 
 def build_radare2():
     if not radare2_exists():
@@ -88,6 +159,8 @@ def build_radare2():
     }.get(sys.platform, "*.so")
     for p in lib_install_dir.rglob(glob):
         if p.is_file():
+            if sys.platform == "darwin":
+                rewrite_dyld_path(p)
             shutil.copy(p, LIBS_DIR)
     os.chdir(ROOT_DIR) 
 
