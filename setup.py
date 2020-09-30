@@ -80,7 +80,7 @@ def build_radare2():
         shutil.rmtree(LIBS_DIR)
     os.makedirs(LIBS_DIR, exist_ok=True)
 
-    lib_install_dir = Path(PREFIX) / "lib"
+    lib_install_dir = Path(PREFIX) / "bin" if sys.platform == "win32" else Path(PREFIX) / "lib"
     glob = {
         "linux" : "*.so",
         "win32" : "*.dll",
