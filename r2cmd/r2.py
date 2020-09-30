@@ -19,7 +19,7 @@ _search_path = [Path(os.path.dirname(os.path.abspath(__file__))) / "r2libr",
                 Path("/usr/local/lib/") if sys.platform == 'darwin' else Path('/usr/lib64')]
 
 # Workaround for dll dependencies.
-# In Py3.8, we may a better way to do this.
+# In Py3.8, we have a better way to do this.
 def _load_libr_win(directory: Path):
     if (directory / _libr_name).exists():
         changed = True
