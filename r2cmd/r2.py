@@ -5,10 +5,10 @@ import sys
 import os
 from pathlib import Path
 
-_libr_name_dict = { 'darwin': 'libr_main.dylib',
-                    'win32': 'r_main.dll',
-                    'linux': 'libr_main.so',
-                    'linux2': 'libr_main.so' }
+_libr_name_dict = { 'darwin': 'libr_core.dylib',
+                    'win32': 'r_core.dll',
+                    'linux': 'libr_core.so',
+                    'linux2': 'libr_core.so' }
 try:
     _libr_name = _libr_name_dict[sys.platform]
 except KeyError:
@@ -16,9 +16,30 @@ except KeyError:
 
 _search_path = [Path(os.path.dirname(os.path.abspath(__file__))) / "r2libr",
                 Path(''),
-                Path(distutils.sysconfig.get_python_lib()),
-                Path("/usr/local/lib/") if sys.platform == 'darwin' else Path('/usr/lib64'),
-                Path(os.getenv('PATH', ''))]
+                Path("/usr/local/lib/") if sys.platform == 'darwin' else Path('/usr/lib64')]
+
+# Workaround for dll dependencies.
+# In Py3.8, we may a better way to do this.
+def _load_libr_win(directory: Path):
+    if (directory / _libr_name).exists():
+        changed = True
+        loaded = set()
+        while changed:
+            changed = False
+            for p in directory.iterdir():
+                if p.is_file() and p.name.endswith("dll"):
+                    try:
+                        dll = ctypes.cdll.LoadLibrary(str(p))
+                        if p.name == _libr_name:
+                            return dll
+                        if p not in loaded:
+                            changed = True
+                            loaded.add(p)
+                    except OSError:
+                        pass
+        return None
+    else:
+        return None
 
 def _load_libr(directory: Path):
     libr_path = directory / _libr_name
@@ -28,7 +49,10 @@ def _load_libr(directory: Path):
         return None
 
 for _path in _search_path:
-    _libr = _load_libr(_path)
+    if sys.platform == "win32":
+        _libr = _load_libr_win(_path)
+    else:
+        _libr = _load_libr(_path)
     if _libr is not None:
         break
 
