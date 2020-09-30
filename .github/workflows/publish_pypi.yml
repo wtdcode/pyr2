@@ -26,15 +26,19 @@ jobs:
       if: matrix.os != 'windows-latest'
       uses: seanmiddleditch/gha-setup-ninja@master
 
+    - name: Set up MSVC
+      if: matrix.os == 'windows-latest'
+      uses: microsoft/setup-msbuild@v1
+
     - name: Set up MSVC CMD x86_64
       if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-      uses: microsoft/setup-msbuild@v1
+      uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
     
     - name: Set up MSVC CMD x86
       if: matrix.os == 'windows-latest' && matrix.platform == 'x32'
-      uses: microsoft/setup-msbuild@v1
+      uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x86
 
