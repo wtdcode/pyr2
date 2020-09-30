@@ -130,7 +130,7 @@ def build_radare2():
     BUILDDIR = os.getenv("R2BUILDDIR", "pyr2build")
     PREFIX = os.getenv("R2PREFIX", str(Path(ROOT_DIR) / "radare2" / "pyr2installdir"))
     if sys.platform == "win32":
-        BACKEND = os.getenv("BACKEND", "vs2017")
+        BACKEND = os.getenv("BACKEND", "vs2019")
     else:
         BACKEND = os.getenv("BACKEND", "ninja")
 
