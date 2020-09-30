@@ -45,14 +45,18 @@ jobs:
     - name: Install dependencies
       run: |
         pip install setuptools wheel meson
-    
+
+    - name: Remove mingw64 to avoid conflicts
+      if: matrix.os == 'windows-latest'
+      shell: cmd
+      run: |
+        rd /s /q "C:\Program Files\Git\mingw64\bin"
+      
     - name: Build distribution 📦
       shell: bash 
-      run:
-          if [ ${{ matrix.platform }} == 'x32' ] && [ ${{ matrix.os }} == 'windows-latest' ]; then
-               rm -rf "C:\Program Files\Git\mingw64\bin"
-          fi
+      run: |
           python setup.py bdist_wheel
+  
     - uses: actions/upload-artifact@v2
       with:
          path: ${{ github.workspace }}/dist/*
