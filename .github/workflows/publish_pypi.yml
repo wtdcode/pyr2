@@ -25,6 +25,12 @@ jobs:
     - name: Set up MSVC
       if: matrix.os == 'windows-latest'
       uses: microsoft/setup-msbuild@v1
+    
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        # ninja version to download. Default: 1.10.0
+        version: 1.10.0
 
     - name: Install dependencies
       run: |
