@@ -222,6 +222,7 @@ setuptools.setup(
     long_description=long_description,
     url="https://github.com/wtdcode/pyr2",
     packages=setuptools.find_packages(),
+    long_description_content_type="text/markdown",
     classifiers=[
         "Programming Language :: Python :: 3"
     ],
