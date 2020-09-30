@@ -46,11 +46,11 @@ jobs:
       run: |
         pip install setuptools wheel meson
 
-    - name: Remove mingw64 to avoid conflicts and Build distribution 📦 on Windows
+    - name: Remove link.exe to avoid conflicts and Build distribution 📦 on Windows
       if: matrix.os == 'windows-latest'
       shell: cmd
       run: |
-          rd /s /q "C:\Program Files\Git\mingw64\bin"
+          del /f "C:\Program Files\Git\mingw64\bin\link.exe"
           python setup.py bdist_wheel
       
     - name: Build distribution 📦
