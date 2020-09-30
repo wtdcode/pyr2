@@ -27,10 +27,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1
     
     - name: Setup Ninja
-      uses: ashutoshvarma/setup-ninja@master
-      with:
-        # ninja version to download. Default: 1.10.0
-        version: 1.10.0
+      uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: Install dependencies
       run: |
