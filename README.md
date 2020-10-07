@@ -13,6 +13,7 @@ pip3 install pyr2
 ## Example
 
 ```python
+import ctypes
 from r2 import libr
 
 r2c = libr.r_core_new()
