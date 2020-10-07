@@ -2,6 +2,14 @@
 
 Yet another radare2 python bindings.
 
+## Installation
+
+```bash
+pip3 install pyr2
+```
+
+**No need to install radare2** since all dynamic libraries are bundled with the Python wheels.
+
 ## Build Instructions
 
 Clone the repository and submodules.
