@@ -1,6 +1,6 @@
 ## pyr2
 
-Yet another r2 python bindings.
+Yet another radare2 python bindings.
 
 ## Build Instructions
 
@@ -34,13 +34,16 @@ pip3 install .
 ## Example
 
 ```python
-from r2 import R2
+from r2 import libr
 
-r2 = R2()
-fh = r2.r_core_open_file("/bin/ls", 0b101, 0)
-r2.r_core_load_bin("/bin/ls")
-r2.r_core_cmd_str("ieq")
-r2.r_core_cmd_str("aaa")
-print(r2.r_core_cmd_str("pdj"))
-r2.r_core_file_close(fh)
+r2c = libr.r_core_new()
+libr.r_core_init(r2c)
+fh = libr.r_core_file_open(r2c, ctypes.create_string_buffer(b"/bin/ls"), 0b101, 0)
+libr.r_core_bin_load(r2c, ctypes.create_string_buffer(b"/bin/ls"), (1<<64) - 1)
+libr.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"ieq"))
+libr.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"aaa"))
+print(ctypes.string_at(libr.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"pdj"))))
+libr.r_core_file_close(r2c, fh)
 ```
+
+`libr` is the core library of radare2 which implements all low-level APIs. Note that it's exported as a bare ctypes library, be cautious with c-style strings.
