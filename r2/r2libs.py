@@ -99,7 +99,7 @@ for _path in _search_path:
         break
 
 if _libraries is None:
-    raise ImportError("Libr is not found on your system.")
+    raise ImportError("Libr is not found on your system or your libr installation is corrupted.")
 
 r_anal = _libraries["r_anal"]
 r_asm = _libraries["r_asm"]
