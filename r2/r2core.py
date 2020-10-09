@@ -6130,10 +6130,10 @@ __all__ = \
 
 if __name__ == "__main__":
     r2c = r_core_new()
-    .r_core_init(r2c)
-    fh = .r_core_file_open(r2c, ctypes.create_string_buffer(b"/bin/ls"), 0b101, 0)
-    .r_core_bin_load(r2c, ctypes.create_string_buffer(b"/bin/ls"), (1<<64) - 1)
-    .r_core_cmd_str(r2c, ctypes.create_string_buffer(b"ieq"))
-    .r_core_cmd_str(r2c, ctypes.create_string_buffer(b"aaa"))
-    print(ctypes.string_at(.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"pdj"))))
-    .r_core_file_close(r2c, fh)
+    r_core_init(r2c)
+    fh = r_core_file_open(r2c, ctypes.create_string_buffer(b"/bin/ls"), 0b101, 0)
+    r_core_bin_load(r2c, ctypes.create_string_buffer(b"/bin/ls"), (1<<64) - 1)
+    r_core_cmd_str(r2c, ctypes.create_string_buffer(b"ieq"))
+    r_core_cmd_str(r2c, ctypes.create_string_buffer(b"aaa"))
+    print(ctypes.string_at(r_core_cmd_str(r2c, ctypes.create_string_buffer(b"pdj"))))
+    r_core_file_close(r2c, fh)
