@@ -44,7 +44,7 @@ Since radare2 chooses `meson` as their alternative building system, the first st
 pip3 install meson
 ```
 
-Build the package.
+Build the package. Note that on Windows, `x64 Native Tools Command Prompt` is required to build.
 
 ```bash
 python3 setup.py build
