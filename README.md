@@ -5,7 +5,7 @@ Yet another radare2 python bindings.
 ## Install
 
 ```bash
-pip3 install pyr2
+pip3 install --upgrade pyr2
 ```
 
 **No need to install radare2** since all dynamic libraries are bundled with the Python wheels.
