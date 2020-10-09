@@ -5,6 +5,7 @@
 # LONGDOUBLE_SIZE is: 16
 #
 import ctypes
+import sys
 from .r2libs import r_io as _libr_io
 
 
@@ -1087,15 +1088,16 @@ r_io_write_i = _libr_io.r_io_write_i
 r_io_write_i.restype = ctypes.c_bool
 r_io_write_i.argtypes = [POINTER_T(struct_r_io_t), ctypes.c_uint64, POINTER_T(ctypes.c_uint64), ctypes.c_int32, ctypes.c_bool]
 pid_t = ctypes.c_int32
-r_io_ptrace = _libr_io.r_io_ptrace
-r_io_ptrace.restype = ctypes.c_int64
-r_io_ptrace.argtypes = [POINTER_T(struct_r_io_t), r_ptrace_request_t, pid_t, POINTER_T(None), r_ptrace_data_t]
-r_io_ptrace_fork = _libr_io.r_io_ptrace_fork
-r_io_ptrace_fork.restype = pid_t
-r_io_ptrace_fork.argtypes = [POINTER_T(struct_r_io_t), POINTER_T(ctypes.CFUNCTYPE(None, POINTER_T(None))), POINTER_T(None)]
-r_io_ptrace_func = _libr_io.r_io_ptrace_func
-r_io_ptrace_func.restype = POINTER_T(None)
-r_io_ptrace_func.argtypes = [POINTER_T(struct_r_io_t), POINTER_T(ctypes.CFUNCTYPE(POINTER_T(None), POINTER_T(None))), POINTER_T(None)]
+if sys.platform == "linux":
+    r_io_ptrace = _libr_io.r_io_ptrace
+    r_io_ptrace.restype = ctypes.c_int64
+    r_io_ptrace.argtypes = [POINTER_T(struct_r_io_t), r_ptrace_request_t, pid_t, POINTER_T(None), r_ptrace_data_t]
+    r_io_ptrace_fork = _libr_io.r_io_ptrace_fork
+    r_io_ptrace_fork.restype = pid_t
+    r_io_ptrace_fork.argtypes = [POINTER_T(struct_r_io_t), POINTER_T(ctypes.CFUNCTYPE(None, POINTER_T(None))), POINTER_T(None)]
+    r_io_ptrace_func = _libr_io.r_io_ptrace_func
+    r_io_ptrace_func.restype = POINTER_T(None)
+    r_io_ptrace_func.argtypes = [POINTER_T(struct_r_io_t), POINTER_T(ctypes.CFUNCTYPE(POINTER_T(None), POINTER_T(None))), POINTER_T(None)]
 r_io_plugin_procpid = struct_r_io_plugin_t # Variable struct_r_io_plugin_t
 r_io_plugin_malloc = struct_r_io_plugin_t # Variable struct_r_io_plugin_t
 r_io_plugin_sparse = struct_r_io_plugin_t # Variable struct_r_io_plugin_t
@@ -1233,8 +1235,7 @@ __all__ = \
     'r_io_plugin_sparse', 'r_io_plugin_tcp', 'r_io_plugin_w32',
     'r_io_plugin_w32dbg', 'r_io_plugin_windbg', 'r_io_plugin_winedbg',
     'r_io_plugin_winkd', 'r_io_plugin_write', 'r_io_plugin_write_at',
-    'r_io_plugin_zip', 'r_io_pread_at', 'r_io_ptrace',
-    'r_io_ptrace_fork', 'r_io_ptrace_func', 'r_io_pwrite_at',
+    'r_io_plugin_zip', 'r_io_pread_at', 'r_io_pwrite_at',
     'r_io_read', 'r_io_read_at', 'r_io_read_at_mapped', 'r_io_read_i',
     'r_io_reopen', 'r_io_resize', 'r_io_seek', 'r_io_set_write_mask',
     'r_io_shift', 'r_io_size', 'r_io_sundo', 'r_io_sundo_list',
@@ -1262,3 +1263,6 @@ __all__ = \
     'struct_r_list_iter_t', 'struct_r_list_t', 'struct_r_pvector_t',
     'struct_r_queue_t', 'struct_r_rb_node_t', 'struct_r_socket_t',
     'struct_r_vector_t', 'struct_sockaddr_in']
+
+if sys.platform == "linux":
+    __all__ += ['r_io_ptrace', 'r_io_ptrace_fork', 'r_io_ptrace_func']
