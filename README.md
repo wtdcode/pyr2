@@ -26,7 +26,7 @@ print(ctypes.string_at(r_core_cmd_str(r2c, ctypes.create_string_buffer(b"pdj")))
 r_core_file_close(r2c, fh)
 ```
 
-`libr` is the core library of radare2 which implements all low-level APIs. Note that it's exported as a bare ctypes library, be cautious with c-style strings.
+Note that all radare2 APIs are exported as bare ctypes function prototype. Be catious with c-style strings.
 
 ## Build Instructions
 
