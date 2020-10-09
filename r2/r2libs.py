@@ -31,9 +31,11 @@ _libr_name = [
     "r_util",
 ]
 
+# https://stackoverflow.com/a/13874620/7510582
 _fname_trans = { 'darwin': lambda x: f"lib{x}.dylib",
                  'win32': lambda x: f"{x}.dll",
-                 'linux': lambda x: f"lib{x}.so"}
+                 'linux': lambda x: f"lib{x}.so",
+                 'linux2': lambda x: f"lib{x}.so"}
 
 _libraries = None
 
