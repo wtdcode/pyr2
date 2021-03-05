@@ -66,7 +66,7 @@ def rewrite_dyld_path(dylib: Path):
         fp.seek(cur, 0)
         return s.decode("utf-8")
     def _parse_libr_name(path):
-        result = re.findall(r"(libr_[^\.]*\.dylib$)", path)
+        result = re.findall(r"(libr_.*\.dylib$)", path)
         if len(result) == 0:
             return None
         else:   
