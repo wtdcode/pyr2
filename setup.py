@@ -157,15 +157,17 @@ def build_radare2():
 
     lib_install_dir = Path(PREFIX) / "bin" if sys.platform == "win32" else Path(PREFIX) / "lib"
     glob = {
-        "linux" : "*.so",
+        "linux" : "*.so*",
         "win32" : "*.dll",
         "darwin" : "*.dylib"
     }.get(sys.platform, "*.so")
     for p in lib_install_dir.rglob(glob):
         if p.is_file():
-            if sys.platform == "darwin":
+            if sys.platform == "darwin" and not p.is_symlink():
                 rewrite_dyld_path(p)
-            shutil.copy(p, LIBS_DIR)
+            # Known Issue: Altough we copy symlinks here, still python would follow symlink and copy a duplicate one.
+            #              To keep r2libs.py simple (meson write versions to file names), let's keep that copy.
+            shutil.copy(p, LIBS_DIR, follow_symlinks=False)
     os.chdir(ROOT_DIR) 
 
 
