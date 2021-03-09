@@ -46,7 +46,7 @@ def gen_clang_args(builddir):
     return " ".join([f"-I{str(p.resolve())}" for p in includes])
 
 def verbose_call(*args, **kwargs):
-    print(",".join([f'"{a}"' for a in args[0]]))
+    print(" ".join([f'"{a}"' for a in args[0]]))
     return subprocess.run(*args, **kwargs)
 
 def find_lib(builddir, lib_name):
@@ -70,17 +70,18 @@ def handle_lib(lib, pargs):
     # Enable this line until ctypeslibs becomes stable enough.
     # binding = binding.replace("_libraries['FIXME_STUB']", f"_libr_stub")
     for _lib in libs:
-        binding = binding.replace(f"_libraries['{str(libs_path[_lib].resolve())}']", f"_libr_{_lib}")
+        binding = binding.replace(f"_libraries['{libs_path[_lib].name}']", f"_libr_{_lib}")
     binding = binding.replace("import ctypes", "import ctypes\n" + "\n".join([f"from .r2libs import r_{_lib} as _libr_{_lib}" for _lib in libs]))
     fpath = Path(pargs.output) / f"r2{lib}.py"
     with open(fpath, "w+") as f:
         f.write(binding)
-    # Delete the abosolute path.
-    subprocess.call(["sed", "-i", r"/_libraries = {}/d", str(fpath)])
-    for _lib in libs:
-        subprocess.call(["sed", "-i", rf"/libr_{_lib}.so/d", str(fpath)])
+    # Delete the redundant assignment.
+    # verbose_call(["sed", "-i", r"/_libraries = {}/d", str(fpath)])
+    verbose_call(["sed", "-i", rf"/ctypes.CDLL.*{libs_path[lib].name}/d", str(fpath)])
+    # for _lib in libs:
+    #     verbose_call(["sed", "-i", rf"/libr_{_lib}.so/d", str(fpath)])
     # Remove clang2py args in comments.
-    subprocess.call(["sed", "-i", r"/TARGET arch/d", str(fpath)])
+    verbose_call(["sed", "-i", r"/TARGET arch/d", str(fpath)])
     
 
 parser = ArgumentParser("r2 python bindings generator")
