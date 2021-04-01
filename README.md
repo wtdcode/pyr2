@@ -2,6 +2,11 @@
 
 Yet another radare2 python bindings.
 
+Compared to [radare2-bindings](https://github.com/radareorg/radare2-bindings) and [radare2-r2pipe](https://github.com/radareorg/radare2-r2pipe), this binding:
+
+- Doesn't need any extra installation of radare2. Just `pip install` and you are ready to go.
+- Gives you the full control of the core radare2 API and helps build your own tools.
+
 ## Install
 
 ```bash
