@@ -38,7 +38,7 @@ jobs:
       run: git config --global user.email mio@lazym.io && git config --global user.name action
 
     - name: Commit new bindings
-      run: git status | grep -q "changes"  && git add r2/ && git commit -m "Bindings generated on `date`"
+      run: git status | grep -q "changes"  && git add -u && git commit -m "Bindings generated on `date`"
 
     - name: Push new bindings
       uses: ad-m/github-push-action@master
