@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Set up python and libclang.
-      run: apt update && apt install python3 python3-pip libclang-11-dev -y
+      run: sudo apt update && sudo apt install python3 python3-pip libclang-11-dev -y
     
     - name: Set up (a specific version) ctypeslib.
       run: python3 -m pip install https://github.com/trolldbois/ctypeslib/archive/15dd04bec1a7eb28ed93e5954d304a4558f0300e.zip
