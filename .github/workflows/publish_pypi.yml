@@ -16,6 +16,7 @@ jobs:
     
     - name: Checkout the repo.
       uses: actions/checkout@v2
+      with:
         submodules: recursive
     
     - name: Install meson
