@@ -19,6 +19,9 @@ jobs:
       with:
         submodules: recursive
     
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+
     - name: Install meson
       run: python3 -m pip install setuptools wheel meson
     
