@@ -682,13 +682,13 @@ RConsCursorPos = struct_c__SA_RConsCursorPos
 class struct_r_cons_t(Structure):
     pass
 
+class struct__IO_FILE(Structure):
+    pass
+
 class struct_r_line_t(Structure):
     pass
 
 class struct_r_num_t(Structure):
-    pass
-
-class struct__IO_FILE(Structure):
     pass
 
 class struct_termios(Structure):
@@ -1813,10 +1813,10 @@ struct_r_panels_menu_item._fields_ = [
     ('p', ctypes.POINTER(struct_r_panel_t)),
 ]
 
-class struct_r_panel_model_t(Structure):
+class struct_r_panel_view_t(Structure):
     pass
 
-class struct_r_panel_view_t(Structure):
+class struct_r_panel_model_t(Structure):
     pass
 
 struct_r_panel_t._pack_ = 1 # source:False

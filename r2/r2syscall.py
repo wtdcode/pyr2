@@ -218,13 +218,13 @@ struct_r_syscall_t._fields_ = [
     ('PADDING_1', ctypes.c_ubyte * 4),
 ]
 
+class struct__IO_codecvt(Structure):
+    pass
+
 class struct__IO_marker(Structure):
     pass
 
 class struct__IO_wide_data(Structure):
-    pass
-
-class struct__IO_codecvt(Structure):
     pass
 
 struct__IO_FILE._pack_ = 1 # source:False

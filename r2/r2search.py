@@ -434,9 +434,6 @@ struct_r_list_iter_t._fields_ = [
     ('p', ctypes.POINTER(struct_r_list_iter_t)),
 ]
 
-class struct_r_id_pool_t(Structure):
-    pass
-
 class struct_r_event_t(Structure):
     pass
 
@@ -444,6 +441,9 @@ class struct_r_id_storage_t(Structure):
     pass
 
 class struct_ls_t(Structure):
+    pass
+
+class struct_r_id_pool_t(Structure):
     pass
 
 class struct_ptrace_wrap_instance_t(Structure):
@@ -477,6 +477,27 @@ struct_r_io_undo_t._fields_ = [
     ('seek', struct_r_io_undos_t * 64),
 ]
 
+class struct_r_skyline_t(Structure):
+    pass
+
+class struct_r_vector_t(Structure):
+    pass
+
+struct_r_vector_t._pack_ = 1 # source:False
+struct_r_vector_t._fields_ = [
+    ('a', ctypes.POINTER(None)),
+    ('len', ctypes.c_uint64),
+    ('capacity', ctypes.c_uint64),
+    ('elem_size', ctypes.c_uint64),
+    ('free', ctypes.CFUNCTYPE(None, ctypes.POINTER(None), ctypes.POINTER(None))),
+    ('free_user', ctypes.POINTER(None)),
+]
+
+struct_r_skyline_t._pack_ = 1 # source:False
+struct_r_skyline_t._fields_ = [
+    ('v', struct_r_vector_t),
+]
+
 class struct_r_core_bind_t(Structure):
     pass
 
@@ -503,27 +524,6 @@ struct_r_core_bind_t._fields_ = [
 ]
 
 class struct_r_pvector_t(Structure):
-    pass
-
-class struct_r_vector_t(Structure):
-    pass
-
-struct_r_vector_t._pack_ = 1 # source:False
-struct_r_vector_t._fields_ = [
-    ('a', ctypes.POINTER(None)),
-    ('len', ctypes.c_uint64),
-    ('capacity', ctypes.c_uint64),
-    ('elem_size', ctypes.c_uint64),
-    ('free', ctypes.CFUNCTYPE(None, ctypes.POINTER(None), ctypes.POINTER(None))),
-    ('free_user', ctypes.POINTER(None)),
-]
-
-struct_r_pvector_t._pack_ = 1 # source:False
-struct_r_pvector_t._fields_ = [
-    ('v', struct_r_vector_t),
-]
-
-class struct_r_skyline_t(Structure):
     _pack_ = 1 # source:False
     _fields_ = [
     ('v', struct_r_vector_t),
@@ -567,10 +567,10 @@ struct_r_io_t._fields_ = [
     ('corebind', struct_r_core_bind_t),
 ]
 
-class struct_r_io_plugin_t(Structure):
+class struct_ht_up_t(Structure):
     pass
 
-class struct_ht_up_t(Structure):
+class struct_r_io_plugin_t(Structure):
     pass
 
 struct_r_io_desc_t._pack_ = 1 # source:False
