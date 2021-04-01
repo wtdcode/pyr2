@@ -5,47 +5,155 @@
 # LONGDOUBLE_SIZE is: 16
 #
 import ctypes
+from .r2libs import r_anal as _libr_anal
+from .r2libs import r_asm as _libr_asm
+from .r2libs import r_bin as _libr_bin
+from .r2libs import r_bp as _libr_bp
+from .r2libs import r_config as _libr_config
+from .r2libs import r_cons as _libr_cons
+from .r2libs import r_core as _libr_core
+from .r2libs import r_crypto as _libr_crypto
+from .r2libs import r_debug as _libr_debug
+from .r2libs import r_egg as _libr_egg
+from .r2libs import r_flag as _libr_flag
+from .r2libs import r_fs as _libr_fs
 from .r2libs import r_hash as _libr_hash
+from .r2libs import r_io as _libr_io
+from .r2libs import r_lang as _libr_lang
+from .r2libs import r_magic as _libr_magic
+from .r2libs import r_main as _libr_main
+from .r2libs import r_parse as _libr_parse
+from .r2libs import r_reg as _libr_reg
+from .r2libs import r_search as _libr_search
+from .r2libs import r_socket as _libr_socket
+from .r2libs import r_syscall as _libr_syscall
+from .r2libs import r_util as _libr_util
 
 
-# if local wordsize is same as target, keep ctypes pointer function.
-if ctypes.sizeof(ctypes.c_void_p) == 8:
-    POINTER_T = ctypes.POINTER
-else:
-    # required to access _ctypes
-    import _ctypes
-    # Emulate a pointer class using the approriate c_int32/c_int64 type
-    # The new class should have :
-    # ['__module__', 'from_param', '_type_', '__dict__', '__weakref__', '__doc__']
-    # but the class should be submitted to a unique instance for each base type
-    # to that if A == B, POINTER_T(A) == POINTER_T(B)
-    ctypes._pointer_t_type_cache = {}
-    def POINTER_T(pointee):
-        # a pointer should have the same length as LONG
-        fake_ptr_base_type = ctypes.c_uint64 
-        # specific case for c_void_p
-        if pointee is None: # VOID pointer type. c_void_p.
-            pointee = type(None) # ctypes.c_void_p # ctypes.c_ulong
-            clsname = 'c_void'
+_libraries = {}
+def string_cast(char_pointer, encoding='utf-8', errors='strict'):
+    value = ctypes.cast(char_pointer, ctypes.c_char_p).value
+    if value is not None and encoding is not None:
+        value = value.decode(encoding, errors=errors)
+    return value
+
+
+def char_pointer_cast(string, encoding='utf-8'):
+    if encoding is not None:
+        try:
+            string = string.encode(encoding)
+        except AttributeError:
+            # In Python3, bytes has no encode attribute
+            pass
+    string = ctypes.c_char_p(string)
+    return ctypes.cast(string, ctypes.POINTER(ctypes.c_char))
+
+
+
+class AsDictMixin:
+    @classmethod
+    def as_dict(cls, self):
+        result = {}
+        if not isinstance(self, AsDictMixin):
+            # not a structure, assume it's already a python object
+            return self
+        if not hasattr(cls, "_fields_"):
+            return result
+        # sys.version_info >= (3, 5)
+        # for (field, *_) in cls._fields_:  # noqa
+        for field_tuple in cls._fields_:  # noqa
+            field = field_tuple[0]
+            if field.startswith('PADDING_'):
+                continue
+            value = getattr(self, field)
+            type_ = type(value)
+            if hasattr(value, "_length_") and hasattr(value, "_type_"):
+                # array
+                if not hasattr(type_, "as_dict"):
+                    value = [v for v in value]
+                else:
+                    type_ = type_._type_
+                    value = [type_.as_dict(v) for v in value]
+            elif hasattr(value, "contents") and hasattr(value, "_type_"):
+                # pointer
+                try:
+                    if not hasattr(type_, "as_dict"):
+                        value = value.contents
+                    else:
+                        type_ = type_._type_
+                        value = type_.as_dict(value.contents)
+                except ValueError:
+                    # nullptr
+                    value = None
+            elif isinstance(value, AsDictMixin):
+                # other structure
+                value = type_.as_dict(value)
+            result[field] = value
+        return result
+
+
+class Structure(ctypes.Structure, AsDictMixin):
+
+    def __init__(self, *args, **kwds):
+        # We don't want to use positional arguments fill PADDING_* fields
+
+        args = dict(zip(self.__class__._field_names_(), args))
+        args.update(kwds)
+        super(Structure, self).__init__(**args)
+
+    @classmethod
+    def _field_names_(cls):
+        if hasattr(cls, '_fields_'):
+            return (f[0] for f in cls._fields_ if not f[0].startswith('PADDING'))
         else:
-            clsname = pointee.__name__
-        if clsname in ctypes._pointer_t_type_cache:
-            return ctypes._pointer_t_type_cache[clsname]
-        # make template
-        class _T(_ctypes._SimpleCData,):
-            _type_ = 'L'
-            _subtype_ = pointee
-            def _sub_addr_(self):
-                return self.value
-            def __repr__(self):
-                return '%s(%d)'%(clsname, self.value)
-            def contents(self):
-                raise TypeError('This is not a ctypes pointer.')
-            def __init__(self, **args):
-                raise TypeError('This is not a ctypes pointer. It is not instanciable.')
-        _class = type('LP_%d_%s'%(8, clsname), (_T,),{}) 
-        ctypes._pointer_t_type_cache[clsname] = _class
-        return _class
+            return ()
+
+    @classmethod
+    def get_type(cls, field):
+        for f in cls._fields_:
+            if f[0] == field:
+                return f[1]
+        return None
+
+    @classmethod
+    def bind(cls, bound_fields):
+        fields = {}
+        for name, type_ in cls._fields_:
+            if hasattr(type_, "restype"):
+                if name in bound_fields:
+                    # use a closure to capture the callback from the loop scope
+                    fields[name] = (
+                        type_((lambda callback: lambda *args: callback(*args))(
+                            bound_fields[name]))
+                    )
+                    del bound_fields[name]
+                else:
+                    # default callback implementation (does nothing)
+                    try:
+                        default_ = type_(0).restype().value
+                    except TypeError:
+                        default_ = None
+                    fields[name] = type_((
+                        lambda default_: lambda *args: default_)(default_))
+            else:
+                # not a callback function, use default initialization
+                if name in bound_fields:
+                    fields[name] = bound_fields[name]
+                    del bound_fields[name]
+                else:
+                    fields[name] = type_()
+        if len(bound_fields) != 0:
+            raise ValueError(
+                "Cannot bind the following unknown callback(s) {}.{}".format(
+                    cls.__name__, bound_fields.keys()
+            ))
+        return cls(**fields)
+
+
+class Union(ctypes.Union, AsDictMixin):
+    pass
+
+
 
 c_int128 = ctypes.c_ubyte*16
 c_uint128 = c_int128
@@ -58,70 +166,80 @@ else:
 
 
 r_hash_version = _libr_hash.r_hash_version
-r_hash_version.restype = POINTER_T(ctypes.c_char)
+r_hash_version.restype = ctypes.POINTER(ctypes.c_char)
 r_hash_version.argtypes = []
-class struct_c__SA_R_MD5_CTX(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+class struct_c__SA_R_MD5_CTX(Structure):
+    pass
+
+struct_c__SA_R_MD5_CTX._pack_ = 1 # source:False
+struct_c__SA_R_MD5_CTX._fields_ = [
     ('state', ctypes.c_uint32 * 4),
     ('count', ctypes.c_uint32 * 2),
     ('buffer', ctypes.c_ubyte * 64),
-     ]
+]
 
 R_MD5_CTX = struct_c__SA_R_MD5_CTX
-class struct_c__SA_R_SHA_CTX(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+class struct_c__SA_R_SHA_CTX(Structure):
+    pass
+
+struct_c__SA_R_SHA_CTX._pack_ = 1 # source:False
+struct_c__SA_R_SHA_CTX._fields_ = [
     ('H', ctypes.c_uint32 * 5),
     ('W', ctypes.c_uint32 * 80),
     ('lenW', ctypes.c_int32),
     ('sizeHi', ctypes.c_uint32),
     ('sizeLo', ctypes.c_uint32),
-     ]
+]
 
 R_SHA_CTX = struct_c__SA_R_SHA_CTX
-class struct__SHA256_CTX(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+class struct__SHA256_CTX(Structure):
+    pass
+
+struct__SHA256_CTX._pack_ = 1 # source:False
+struct__SHA256_CTX._fields_ = [
     ('state', ctypes.c_uint32 * 8),
     ('bitcount', ctypes.c_uint64),
     ('buffer', ctypes.c_ubyte * 64),
-     ]
+]
 
 R_SHA256_CTX = struct__SHA256_CTX
-class struct__SHA512_CTX(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+class struct__SHA512_CTX(Structure):
+    pass
+
+struct__SHA512_CTX._pack_ = 1 # source:False
+struct__SHA512_CTX._fields_ = [
     ('state', ctypes.c_uint64 * 8),
     ('bitcount', ctypes.c_uint64 * 2),
     ('buffer', ctypes.c_ubyte * 128),
-     ]
+]
 
 R_SHA512_CTX = struct__SHA512_CTX
 R_SHA384_CTX = struct__SHA512_CTX
 utcrc = ctypes.c_uint64
 size_t = ctypes.c_uint64
 r_hash_fletcher8 = _libr_hash.r_hash_fletcher8
-r_hash_fletcher8.restype = ctypes.c_uint16
-r_hash_fletcher8.argtypes = [POINTER_T(ctypes.c_ubyte), size_t]
+r_hash_fletcher8.restype = ctypes.c_ubyte
+r_hash_fletcher8.argtypes = [ctypes.POINTER(ctypes.c_ubyte), size_t]
 r_hash_fletcher16 = _libr_hash.r_hash_fletcher16
 r_hash_fletcher16.restype = ctypes.c_uint16
-r_hash_fletcher16.argtypes = [POINTER_T(ctypes.c_ubyte), size_t]
+r_hash_fletcher16.argtypes = [ctypes.POINTER(ctypes.c_ubyte), size_t]
 r_hash_fletcher32 = _libr_hash.r_hash_fletcher32
 r_hash_fletcher32.restype = ctypes.c_uint32
-r_hash_fletcher32.argtypes = [POINTER_T(ctypes.c_ubyte), size_t]
+r_hash_fletcher32.argtypes = [ctypes.POINTER(ctypes.c_ubyte), size_t]
 r_hash_fletcher64 = _libr_hash.r_hash_fletcher64
 r_hash_fletcher64.restype = ctypes.c_uint64
-r_hash_fletcher64.argtypes = [POINTER_T(ctypes.c_ubyte), size_t]
-class struct_c__SA_R_CRC_CTX(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+r_hash_fletcher64.argtypes = [ctypes.POINTER(ctypes.c_ubyte), size_t]
+class struct_c__SA_R_CRC_CTX(Structure):
+    pass
+
+struct_c__SA_R_CRC_CTX._pack_ = 1 # source:False
+struct_c__SA_R_CRC_CTX._fields_ = [
     ('crc', ctypes.c_uint64),
     ('size', ctypes.c_uint32),
     ('reflect', ctypes.c_int32),
     ('poly', ctypes.c_uint64),
     ('xout', ctypes.c_uint64),
-     ]
+]
 
 R_CRC_CTX = struct_c__SA_R_CRC_CTX
 
@@ -174,10 +292,12 @@ CRC_PRESET_CRC64_WE = 19
 CRC_PRESET_CRC64_XZ = 20
 CRC_PRESET_CRC64_ISO = 21
 CRC_PRESET_SIZE = 22
-CRC_PRESETS = ctypes.c_int # enum
-class struct_r_hash_t(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+CRC_PRESETS = ctypes.c_uint32 # enum
+class struct_r_hash_t(Structure):
+    pass
+
+struct_r_hash_t._pack_ = 1 # source:False
+struct_r_hash_t._fields_ = [
     ('md5', R_MD5_CTX),
     ('sha1', R_SHA_CTX),
     ('sha256', R_SHA256_CTX),
@@ -187,17 +307,19 @@ class struct_r_hash_t(ctypes.Structure):
     ('PADDING_0', ctypes.c_ubyte * 7),
     ('entropy', ctypes.c_double),
     ('digest', ctypes.c_ubyte * 128),
-     ]
+]
 
-class struct_r_hash_seed_t(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+class struct_r_hash_seed_t(Structure):
+    pass
+
+struct_r_hash_seed_t._pack_ = 1 # source:False
+struct_r_hash_seed_t._fields_ = [
     ('prefix', ctypes.c_int32),
     ('PADDING_0', ctypes.c_ubyte * 4),
-    ('buf', POINTER_T(ctypes.c_ubyte)),
+    ('buf', ctypes.POINTER(ctypes.c_ubyte)),
     ('len', ctypes.c_int32),
     ('PADDING_1', ctypes.c_ubyte * 4),
-     ]
+]
 
 RHashSeed = struct_r_hash_seed_t
 
@@ -296,97 +418,97 @@ R_HASH_IDX_FLETCHER16 = 42
 R_HASH_IDX_FLETCHER32 = 43
 R_HASH_IDX_FLETCHER64 = 44
 R_HASH_NUM_INDICES = 45
-HASH_INDICES = ctypes.c_int # enum
+HASH_INDICES = ctypes.c_uint32 # enum
 r_hash_new = _libr_hash.r_hash_new
-r_hash_new.restype = POINTER_T(struct_r_hash_t)
+r_hash_new.restype = ctypes.POINTER(struct_r_hash_t)
 r_hash_new.argtypes = [ctypes.c_bool, ctypes.c_uint64]
 r_hash_free = _libr_hash.r_hash_free
 r_hash_free.restype = None
-r_hash_free.argtypes = [POINTER_T(struct_r_hash_t)]
+r_hash_free.argtypes = [ctypes.POINTER(struct_r_hash_t)]
 r_hash_do_md4 = _libr_hash.r_hash_do_md4
-r_hash_do_md4.restype = POINTER_T(ctypes.c_ubyte)
-r_hash_do_md4.argtypes = [POINTER_T(struct_r_hash_t), POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_do_md4.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_hash_do_md4.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_do_md5 = _libr_hash.r_hash_do_md5
-r_hash_do_md5.restype = POINTER_T(ctypes.c_ubyte)
-r_hash_do_md5.argtypes = [POINTER_T(struct_r_hash_t), POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_do_md5.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_hash_do_md5.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_do_sha1 = _libr_hash.r_hash_do_sha1
-r_hash_do_sha1.restype = POINTER_T(ctypes.c_ubyte)
-r_hash_do_sha1.argtypes = [POINTER_T(struct_r_hash_t), POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_do_sha1.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_hash_do_sha1.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_do_sha256 = _libr_hash.r_hash_do_sha256
-r_hash_do_sha256.restype = POINTER_T(ctypes.c_ubyte)
-r_hash_do_sha256.argtypes = [POINTER_T(struct_r_hash_t), POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_do_sha256.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_hash_do_sha256.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_do_sha384 = _libr_hash.r_hash_do_sha384
-r_hash_do_sha384.restype = POINTER_T(ctypes.c_ubyte)
-r_hash_do_sha384.argtypes = [POINTER_T(struct_r_hash_t), POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_do_sha384.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_hash_do_sha384.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_do_sha512 = _libr_hash.r_hash_do_sha512
-r_hash_do_sha512.restype = POINTER_T(ctypes.c_ubyte)
-r_hash_do_sha512.argtypes = [POINTER_T(struct_r_hash_t), POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_do_sha512.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_hash_do_sha512.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_do_hmac_sha256 = _libr_hash.r_hash_do_hmac_sha256
-r_hash_do_hmac_sha256.restype = POINTER_T(ctypes.c_ubyte)
-r_hash_do_hmac_sha256.argtypes = [POINTER_T(struct_r_hash_t), POINTER_T(ctypes.c_ubyte), ctypes.c_int32, POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_do_hmac_sha256.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_hash_do_hmac_sha256.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_to_string = _libr_hash.r_hash_to_string
-r_hash_to_string.restype = POINTER_T(ctypes.c_char)
-r_hash_to_string.argtypes = [POINTER_T(struct_r_hash_t), POINTER_T(ctypes.c_char), POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_to_string.restype = ctypes.POINTER(ctypes.c_char)
+r_hash_to_string.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_name = _libr_hash.r_hash_name
-r_hash_name.restype = POINTER_T(ctypes.c_char)
+r_hash_name.restype = ctypes.POINTER(ctypes.c_char)
 r_hash_name.argtypes = [ctypes.c_uint64]
 r_hash_name_to_bits = _libr_hash.r_hash_name_to_bits
 r_hash_name_to_bits.restype = ctypes.c_uint64
-r_hash_name_to_bits.argtypes = [POINTER_T(ctypes.c_char)]
+r_hash_name_to_bits.argtypes = [ctypes.POINTER(ctypes.c_char)]
 r_hash_size = _libr_hash.r_hash_size
 r_hash_size.restype = ctypes.c_int32
 r_hash_size.argtypes = [ctypes.c_uint64]
 r_hash_calculate = _libr_hash.r_hash_calculate
 r_hash_calculate.restype = ctypes.c_int32
-r_hash_calculate.argtypes = [POINTER_T(struct_r_hash_t), ctypes.c_uint64, POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_calculate.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.c_uint64, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_deviation = _libr_hash.r_hash_deviation
 r_hash_deviation.restype = ctypes.c_ubyte
-r_hash_deviation.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_deviation.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_adler32 = _libr_hash.r_hash_adler32
 r_hash_adler32.restype = ctypes.c_uint32
-r_hash_adler32.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_adler32.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_xxhash = _libr_hash.r_hash_xxhash
 r_hash_xxhash.restype = ctypes.c_uint32
-r_hash_xxhash.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_xxhash.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_xor = _libr_hash.r_hash_xor
 r_hash_xor.restype = ctypes.c_ubyte
-r_hash_xor.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_xor.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_xorpair = _libr_hash.r_hash_xorpair
 r_hash_xorpair.restype = ctypes.c_uint16
-r_hash_xorpair.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_xorpair.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_parity = _libr_hash.r_hash_parity
 r_hash_parity.restype = ctypes.c_int32
-r_hash_parity.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_parity.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_mod255 = _libr_hash.r_hash_mod255
 r_hash_mod255.restype = ctypes.c_ubyte
-r_hash_mod255.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_mod255.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_luhn = _libr_hash.r_hash_luhn
 r_hash_luhn.restype = ctypes.c_uint64
-r_hash_luhn.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_luhn.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_crc_preset = _libr_hash.r_hash_crc_preset
 r_hash_crc_preset.restype = utcrc
-r_hash_crc_preset.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint32, CRC_PRESETS]
+r_hash_crc_preset.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint32, CRC_PRESETS]
 r_hash_hamdist = _libr_hash.r_hash_hamdist
 r_hash_hamdist.restype = ctypes.c_ubyte
-r_hash_hamdist.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_hamdist.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_entropy = _libr_hash.r_hash_entropy
 r_hash_entropy.restype = ctypes.c_double
-r_hash_entropy.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_entropy.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_entropy_fraction = _libr_hash.r_hash_entropy_fraction
 r_hash_entropy_fraction.restype = ctypes.c_double
-r_hash_entropy_fraction.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_entropy_fraction.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_pcprint = _libr_hash.r_hash_pcprint
 r_hash_pcprint.restype = ctypes.c_int32
-r_hash_pcprint.argtypes = [POINTER_T(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_pcprint.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_do_begin = _libr_hash.r_hash_do_begin
 r_hash_do_begin.restype = None
-r_hash_do_begin.argtypes = [POINTER_T(struct_r_hash_t), ctypes.c_uint64]
+r_hash_do_begin.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.c_uint64]
 r_hash_do_end = _libr_hash.r_hash_do_end
 r_hash_do_end.restype = None
-r_hash_do_end.argtypes = [POINTER_T(struct_r_hash_t), ctypes.c_uint64]
+r_hash_do_end.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.c_uint64]
 r_hash_do_spice = _libr_hash.r_hash_do_spice
 r_hash_do_spice.restype = None
-r_hash_do_spice.argtypes = [POINTER_T(struct_r_hash_t), ctypes.c_uint64, ctypes.c_int32, POINTER_T(struct_r_hash_seed_t)]
+r_hash_do_spice.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.c_uint64, ctypes.c_int32, ctypes.POINTER(struct_r_hash_seed_t)]
 __all__ = \
     ['CRC_PRESETS', 'CRC_PRESET_15_CAN', 'CRC_PRESET_16',
     'CRC_PRESET_16_CITT', 'CRC_PRESET_16_HDLC', 'CRC_PRESET_16_USB',

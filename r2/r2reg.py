@@ -5,47 +5,155 @@
 # LONGDOUBLE_SIZE is: 16
 #
 import ctypes
+from .r2libs import r_anal as _libr_anal
+from .r2libs import r_asm as _libr_asm
+from .r2libs import r_bin as _libr_bin
+from .r2libs import r_bp as _libr_bp
+from .r2libs import r_config as _libr_config
+from .r2libs import r_cons as _libr_cons
+from .r2libs import r_core as _libr_core
+from .r2libs import r_crypto as _libr_crypto
+from .r2libs import r_debug as _libr_debug
+from .r2libs import r_egg as _libr_egg
+from .r2libs import r_flag as _libr_flag
+from .r2libs import r_fs as _libr_fs
+from .r2libs import r_hash as _libr_hash
+from .r2libs import r_io as _libr_io
+from .r2libs import r_lang as _libr_lang
+from .r2libs import r_magic as _libr_magic
+from .r2libs import r_main as _libr_main
+from .r2libs import r_parse as _libr_parse
 from .r2libs import r_reg as _libr_reg
+from .r2libs import r_search as _libr_search
+from .r2libs import r_socket as _libr_socket
+from .r2libs import r_syscall as _libr_syscall
+from .r2libs import r_util as _libr_util
 
 
-# if local wordsize is same as target, keep ctypes pointer function.
-if ctypes.sizeof(ctypes.c_void_p) == 8:
-    POINTER_T = ctypes.POINTER
-else:
-    # required to access _ctypes
-    import _ctypes
-    # Emulate a pointer class using the approriate c_int32/c_int64 type
-    # The new class should have :
-    # ['__module__', 'from_param', '_type_', '__dict__', '__weakref__', '__doc__']
-    # but the class should be submitted to a unique instance for each base type
-    # to that if A == B, POINTER_T(A) == POINTER_T(B)
-    ctypes._pointer_t_type_cache = {}
-    def POINTER_T(pointee):
-        # a pointer should have the same length as LONG
-        fake_ptr_base_type = ctypes.c_uint64 
-        # specific case for c_void_p
-        if pointee is None: # VOID pointer type. c_void_p.
-            pointee = type(None) # ctypes.c_void_p # ctypes.c_ulong
-            clsname = 'c_void'
+_libraries = {}
+def string_cast(char_pointer, encoding='utf-8', errors='strict'):
+    value = ctypes.cast(char_pointer, ctypes.c_char_p).value
+    if value is not None and encoding is not None:
+        value = value.decode(encoding, errors=errors)
+    return value
+
+
+def char_pointer_cast(string, encoding='utf-8'):
+    if encoding is not None:
+        try:
+            string = string.encode(encoding)
+        except AttributeError:
+            # In Python3, bytes has no encode attribute
+            pass
+    string = ctypes.c_char_p(string)
+    return ctypes.cast(string, ctypes.POINTER(ctypes.c_char))
+
+
+
+class AsDictMixin:
+    @classmethod
+    def as_dict(cls, self):
+        result = {}
+        if not isinstance(self, AsDictMixin):
+            # not a structure, assume it's already a python object
+            return self
+        if not hasattr(cls, "_fields_"):
+            return result
+        # sys.version_info >= (3, 5)
+        # for (field, *_) in cls._fields_:  # noqa
+        for field_tuple in cls._fields_:  # noqa
+            field = field_tuple[0]
+            if field.startswith('PADDING_'):
+                continue
+            value = getattr(self, field)
+            type_ = type(value)
+            if hasattr(value, "_length_") and hasattr(value, "_type_"):
+                # array
+                if not hasattr(type_, "as_dict"):
+                    value = [v for v in value]
+                else:
+                    type_ = type_._type_
+                    value = [type_.as_dict(v) for v in value]
+            elif hasattr(value, "contents") and hasattr(value, "_type_"):
+                # pointer
+                try:
+                    if not hasattr(type_, "as_dict"):
+                        value = value.contents
+                    else:
+                        type_ = type_._type_
+                        value = type_.as_dict(value.contents)
+                except ValueError:
+                    # nullptr
+                    value = None
+            elif isinstance(value, AsDictMixin):
+                # other structure
+                value = type_.as_dict(value)
+            result[field] = value
+        return result
+
+
+class Structure(ctypes.Structure, AsDictMixin):
+
+    def __init__(self, *args, **kwds):
+        # We don't want to use positional arguments fill PADDING_* fields
+
+        args = dict(zip(self.__class__._field_names_(), args))
+        args.update(kwds)
+        super(Structure, self).__init__(**args)
+
+    @classmethod
+    def _field_names_(cls):
+        if hasattr(cls, '_fields_'):
+            return (f[0] for f in cls._fields_ if not f[0].startswith('PADDING'))
         else:
-            clsname = pointee.__name__
-        if clsname in ctypes._pointer_t_type_cache:
-            return ctypes._pointer_t_type_cache[clsname]
-        # make template
-        class _T(_ctypes._SimpleCData,):
-            _type_ = 'L'
-            _subtype_ = pointee
-            def _sub_addr_(self):
-                return self.value
-            def __repr__(self):
-                return '%s(%d)'%(clsname, self.value)
-            def contents(self):
-                raise TypeError('This is not a ctypes pointer.')
-            def __init__(self, **args):
-                raise TypeError('This is not a ctypes pointer. It is not instanciable.')
-        _class = type('LP_%d_%s'%(8, clsname), (_T,),{}) 
-        ctypes._pointer_t_type_cache[clsname] = _class
-        return _class
+            return ()
+
+    @classmethod
+    def get_type(cls, field):
+        for f in cls._fields_:
+            if f[0] == field:
+                return f[1]
+        return None
+
+    @classmethod
+    def bind(cls, bound_fields):
+        fields = {}
+        for name, type_ in cls._fields_:
+            if hasattr(type_, "restype"):
+                if name in bound_fields:
+                    # use a closure to capture the callback from the loop scope
+                    fields[name] = (
+                        type_((lambda callback: lambda *args: callback(*args))(
+                            bound_fields[name]))
+                    )
+                    del bound_fields[name]
+                else:
+                    # default callback implementation (does nothing)
+                    try:
+                        default_ = type_(0).restype().value
+                    except TypeError:
+                        default_ = None
+                    fields[name] = type_((
+                        lambda default_: lambda *args: default_)(default_))
+            else:
+                # not a callback function, use default initialization
+                if name in bound_fields:
+                    fields[name] = bound_fields[name]
+                    del bound_fields[name]
+                else:
+                    fields[name] = type_()
+        if len(bound_fields) != 0:
+            raise ValueError(
+                "Cannot bind the following unknown callback(s) {}.{}".format(
+                    cls.__name__, bound_fields.keys()
+            ))
+        return cls(**fields)
+
+
+class Union(ctypes.Union, AsDictMixin):
+    pass
+
+
 
 c_int128 = ctypes.c_ubyte*16
 c_uint128 = c_int128
@@ -57,31 +165,8 @@ else:
 
 
 
-class struct_r_list_iter_t(ctypes.Structure):
-    pass
-
-struct_r_list_iter_t._pack_ = True # source:False
-struct_r_list_iter_t._fields_ = [
-    ('data', POINTER_T(None)),
-    ('n', POINTER_T(struct_r_list_iter_t)),
-    ('p', POINTER_T(struct_r_list_iter_t)),
-]
-
-class struct_r_list_t(ctypes.Structure):
-    pass
-
-struct_r_list_t._pack_ = True # source:False
-struct_r_list_t._fields_ = [
-    ('head', POINTER_T(struct_r_list_iter_t)),
-    ('tail', POINTER_T(struct_r_list_iter_t)),
-    ('free', POINTER_T(ctypes.CFUNCTYPE(None, POINTER_T(None)))),
-    ('length', ctypes.c_int32),
-    ('sorted', ctypes.c_bool),
-    ('PADDING_0', ctypes.c_ubyte * 3),
-]
-
 r_reg_version = _libr_reg.r_reg_version
-r_reg_version.restype = POINTER_T(ctypes.c_char)
+r_reg_version.restype = ctypes.POINTER(ctypes.c_char)
 r_reg_version.argtypes = []
 
 # values for enumeration 'c__EA_RRegisterType'
@@ -107,7 +192,7 @@ R_REG_TYPE_FLG = 6
 R_REG_TYPE_SEG = 7
 R_REG_TYPE_LAST = 8
 R_REG_TYPE_ALL = -1
-c__EA_RRegisterType = ctypes.c_int # enum
+c__EA_RRegisterType = ctypes.c_int32 # enum
 RRegisterType = c__EA_RRegisterType
 RRegisterType__enumvalues = c__EA_RRegisterType__enumvalues
 
@@ -164,107 +249,138 @@ R_REG_NAME_CF = 21
 R_REG_NAME_OF = 22
 R_REG_NAME_SN = 23
 R_REG_NAME_LAST = 24
-c__EA_RRegisterId = ctypes.c_int # enum
+c__EA_RRegisterId = ctypes.c_uint32 # enum
 RRegisterId = c__EA_RRegisterId
 RRegisterId__enumvalues = c__EA_RRegisterId__enumvalues
-class struct_r_reg_item_t(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
-    ('name', POINTER_T(ctypes.c_char)),
+class struct_r_reg_item_t(Structure):
+    pass
+
+struct_r_reg_item_t._pack_ = 1 # source:False
+struct_r_reg_item_t._fields_ = [
+    ('name', ctypes.POINTER(ctypes.c_char)),
     ('type', ctypes.c_int32),
     ('size', ctypes.c_int32),
     ('offset', ctypes.c_int32),
     ('packed_size', ctypes.c_int32),
     ('is_float', ctypes.c_bool),
     ('PADDING_0', ctypes.c_ubyte * 7),
-    ('flags', POINTER_T(ctypes.c_char)),
-    ('comment', POINTER_T(ctypes.c_char)),
+    ('flags', ctypes.POINTER(ctypes.c_char)),
+    ('comment', ctypes.POINTER(ctypes.c_char)),
     ('index', ctypes.c_int32),
     ('arena', ctypes.c_int32),
-     ]
+]
 
 RRegItem = struct_r_reg_item_t
-class struct_r_reg_arena_t(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
-    ('bytes', POINTER_T(ctypes.c_ubyte)),
+class struct_r_reg_arena_t(Structure):
+    pass
+
+struct_r_reg_arena_t._pack_ = 1 # source:False
+struct_r_reg_arena_t._fields_ = [
+    ('bytes', ctypes.POINTER(ctypes.c_ubyte)),
     ('size', ctypes.c_int32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-     ]
-
-RRegArena = struct_r_reg_arena_t
-class struct_r_reg_set_t(ctypes.Structure):
-    pass
-
-class struct_ht_pp_t(ctypes.Structure):
-    pass
-
-class struct_ht_pp_bucket_t(ctypes.Structure):
-    pass
-
-class struct_ht_pp_kv(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
-    ('key', POINTER_T(None)),
-    ('value', POINTER_T(None)),
-    ('key_len', ctypes.c_uint32),
-    ('value_len', ctypes.c_uint32),
-     ]
-
-struct_ht_pp_bucket_t._pack_ = True # source:False
-struct_ht_pp_bucket_t._fields_ = [
-    ('arr', POINTER_T(struct_ht_pp_kv)),
-    ('count', ctypes.c_uint32),
     ('PADDING_0', ctypes.c_ubyte * 4),
 ]
 
-class struct_ht_pp_options_t(ctypes.Structure):
+RRegArena = struct_r_reg_arena_t
+class struct_r_reg_set_t(Structure):
     pass
 
-struct_ht_pp_options_t._pack_ = True # source:False
+class struct_r_list_t(Structure):
+    pass
+
+class struct_ht_pp_t(Structure):
+    pass
+
+class struct_r_list_iter_t(Structure):
+    pass
+
+struct_r_reg_set_t._pack_ = 1 # source:False
+struct_r_reg_set_t._fields_ = [
+    ('arena', ctypes.POINTER(struct_r_reg_arena_t)),
+    ('pool', ctypes.POINTER(struct_r_list_t)),
+    ('regs', ctypes.POINTER(struct_r_list_t)),
+    ('ht_regs', ctypes.POINTER(struct_ht_pp_t)),
+    ('cur', ctypes.POINTER(struct_r_list_iter_t)),
+    ('maskregstype', ctypes.c_int32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+]
+
+struct_r_list_t._pack_ = 1 # source:False
+struct_r_list_t._fields_ = [
+    ('head', ctypes.POINTER(struct_r_list_iter_t)),
+    ('tail', ctypes.POINTER(struct_r_list_iter_t)),
+    ('free', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
+    ('length', ctypes.c_int32),
+    ('sorted', ctypes.c_bool),
+    ('PADDING_0', ctypes.c_ubyte * 3),
+]
+
+struct_r_list_iter_t._pack_ = 1 # source:False
+struct_r_list_iter_t._fields_ = [
+    ('data', ctypes.POINTER(None)),
+    ('n', ctypes.POINTER(struct_r_list_iter_t)),
+    ('p', ctypes.POINTER(struct_r_list_iter_t)),
+]
+
+class struct_ht_pp_bucket_t(Structure):
+    pass
+
+class struct_ht_pp_options_t(Structure):
+    pass
+
+class struct_ht_pp_kv(Structure):
+    pass
+
+struct_ht_pp_options_t._pack_ = 1 # source:False
 struct_ht_pp_options_t._fields_ = [
-    ('cmp', POINTER_T(ctypes.CFUNCTYPE(ctypes.c_int32, POINTER_T(None), POINTER_T(None)))),
-    ('hashfn', POINTER_T(ctypes.CFUNCTYPE(ctypes.c_uint32, POINTER_T(None)))),
-    ('dupkey', POINTER_T(ctypes.CFUNCTYPE(POINTER_T(None), POINTER_T(None)))),
-    ('dupvalue', POINTER_T(ctypes.CFUNCTYPE(POINTER_T(None), POINTER_T(None)))),
-    ('calcsizeK', POINTER_T(ctypes.CFUNCTYPE(ctypes.c_uint32, POINTER_T(None)))),
-    ('calcsizeV', POINTER_T(ctypes.CFUNCTYPE(ctypes.c_uint32, POINTER_T(None)))),
-    ('freefn', POINTER_T(ctypes.CFUNCTYPE(None, POINTER_T(struct_ht_pp_kv)))),
+    ('cmp', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(None))),
+    ('hashfn', ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.POINTER(None))),
+    ('dupkey', ctypes.CFUNCTYPE(ctypes.POINTER(None), ctypes.POINTER(None))),
+    ('dupvalue', ctypes.CFUNCTYPE(ctypes.POINTER(None), ctypes.POINTER(None))),
+    ('calcsizeK', ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.POINTER(None))),
+    ('calcsizeV', ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.POINTER(None))),
+    ('freefn', ctypes.CFUNCTYPE(None, ctypes.POINTER(struct_ht_pp_kv))),
     ('elem_size', ctypes.c_uint64),
 ]
 
-struct_ht_pp_t._pack_ = True # source:False
+struct_ht_pp_t._pack_ = 1 # source:False
 struct_ht_pp_t._fields_ = [
     ('size', ctypes.c_uint32),
     ('count', ctypes.c_uint32),
-    ('table', POINTER_T(struct_ht_pp_bucket_t)),
+    ('table', ctypes.POINTER(struct_ht_pp_bucket_t)),
     ('prime_idx', ctypes.c_uint32),
     ('PADDING_0', ctypes.c_ubyte * 4),
     ('opt', struct_ht_pp_options_t),
 ]
 
-struct_r_reg_set_t._pack_ = True # source:False
-struct_r_reg_set_t._fields_ = [
-    ('arena', POINTER_T(struct_r_reg_arena_t)),
-    ('pool', POINTER_T(struct_r_list_t)),
-    ('regs', POINTER_T(struct_r_list_t)),
-    ('ht_regs', POINTER_T(struct_ht_pp_t)),
-    ('cur', POINTER_T(struct_r_list_iter_t)),
-    ('maskregstype', ctypes.c_int32),
+struct_ht_pp_bucket_t._pack_ = 1 # source:False
+struct_ht_pp_bucket_t._fields_ = [
+    ('arr', ctypes.POINTER(struct_ht_pp_kv)),
+    ('count', ctypes.c_uint32),
     ('PADDING_0', ctypes.c_ubyte * 4),
 ]
 
+struct_ht_pp_kv._pack_ = 1 # source:False
+struct_ht_pp_kv._fields_ = [
+    ('key', ctypes.POINTER(None)),
+    ('value', ctypes.POINTER(None)),
+    ('key_len', ctypes.c_uint32),
+    ('value_len', ctypes.c_uint32),
+]
+
 RRegSet = struct_r_reg_set_t
-class struct_r_reg_t(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
-    ('profile', POINTER_T(ctypes.c_char)),
-    ('reg_profile_cmt', POINTER_T(ctypes.c_char)),
-    ('reg_profile_str', POINTER_T(ctypes.c_char)),
-    ('name', POINTER_T(ctypes.c_char) * 24),
+class struct_r_reg_t(Structure):
+    pass
+
+struct_r_reg_t._pack_ = 1 # source:False
+struct_r_reg_t._fields_ = [
+    ('profile', ctypes.POINTER(ctypes.c_char)),
+    ('reg_profile_cmt', ctypes.POINTER(ctypes.c_char)),
+    ('reg_profile_str', ctypes.POINTER(ctypes.c_char)),
+    ('name', ctypes.POINTER(ctypes.c_char) * 24),
     ('regset', struct_r_reg_set_t * 8),
-    ('allregs', POINTER_T(struct_r_list_t)),
-    ('roregs', POINTER_T(struct_r_list_t)),
+    ('allregs', ctypes.POINTER(struct_r_list_t)),
+    ('roregs', ctypes.POINTER(struct_r_list_t)),
     ('iters', ctypes.c_int32),
     ('arch', ctypes.c_int32),
     ('bits', ctypes.c_int32),
@@ -272,256 +388,176 @@ class struct_r_reg_t(ctypes.Structure):
     ('is_thumb', ctypes.c_bool),
     ('big_endian', ctypes.c_bool),
     ('PADDING_0', ctypes.c_ubyte * 6),
-     ]
+]
 
 RReg = struct_r_reg_t
-class struct_r_reg_flags_t(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+class struct_r_reg_flags_t(Structure):
+    pass
+
+struct_r_reg_flags_t._pack_ = 1 # source:False
+struct_r_reg_flags_t._fields_ = [
     ('s', ctypes.c_bool),
     ('z', ctypes.c_bool),
     ('a', ctypes.c_bool),
     ('c', ctypes.c_bool),
     ('o', ctypes.c_bool),
     ('p', ctypes.c_bool),
-     ]
+]
 
 RRegFlags = struct_r_reg_flags_t
 r_reg_free = _libr_reg.r_reg_free
 r_reg_free.restype = None
-r_reg_free.argtypes = [POINTER_T(struct_r_reg_t)]
+r_reg_free.argtypes = [ctypes.POINTER(struct_r_reg_t)]
 r_reg_free_internal = _libr_reg.r_reg_free_internal
 r_reg_free_internal.restype = None
-r_reg_free_internal.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_bool]
+r_reg_free_internal.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_bool]
 r_reg_new = _libr_reg.r_reg_new
-r_reg_new.restype = POINTER_T(struct_r_reg_t)
+r_reg_new.restype = ctypes.POINTER(struct_r_reg_t)
 r_reg_new.argtypes = []
+r_reg_init = _libr_reg.r_reg_init
+r_reg_init.restype = ctypes.POINTER(struct_r_reg_t)
+r_reg_init.argtypes = [ctypes.POINTER(struct_r_reg_t)]
 r_reg_set_name = _libr_reg.r_reg_set_name
 r_reg_set_name.restype = ctypes.c_bool
-r_reg_set_name.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32, POINTER_T(ctypes.c_char)]
+r_reg_set_name.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32, ctypes.POINTER(ctypes.c_char)]
 r_reg_set_profile_string = _libr_reg.r_reg_set_profile_string
 r_reg_set_profile_string.restype = ctypes.c_bool
-r_reg_set_profile_string.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
+r_reg_set_profile_string.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
 r_reg_profile_to_cc = _libr_reg.r_reg_profile_to_cc
-r_reg_profile_to_cc.restype = POINTER_T(ctypes.c_char)
-r_reg_profile_to_cc.argtypes = [POINTER_T(struct_r_reg_t)]
+r_reg_profile_to_cc.restype = ctypes.POINTER(ctypes.c_char)
+r_reg_profile_to_cc.argtypes = [ctypes.POINTER(struct_r_reg_t)]
 r_reg_set_profile = _libr_reg.r_reg_set_profile
 r_reg_set_profile.restype = ctypes.c_bool
-r_reg_set_profile.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
+r_reg_set_profile.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
 r_reg_parse_gdb_profile = _libr_reg.r_reg_parse_gdb_profile
-r_reg_parse_gdb_profile.restype = POINTER_T(ctypes.c_char)
-r_reg_parse_gdb_profile.argtypes = [POINTER_T(ctypes.c_char)]
+r_reg_parse_gdb_profile.restype = ctypes.POINTER(ctypes.c_char)
+r_reg_parse_gdb_profile.argtypes = [ctypes.POINTER(ctypes.c_char)]
 r_reg_is_readonly = _libr_reg.r_reg_is_readonly
 r_reg_is_readonly.restype = ctypes.c_bool
-r_reg_is_readonly.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t)]
+r_reg_is_readonly.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t)]
 r_reg_regset_get = _libr_reg.r_reg_regset_get
-r_reg_regset_get.restype = POINTER_T(struct_r_reg_set_t)
-r_reg_regset_get.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32]
+r_reg_regset_get.restype = ctypes.POINTER(struct_r_reg_set_t)
+r_reg_regset_get.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32]
 r_reg_getv = _libr_reg.r_reg_getv
 r_reg_getv.restype = ctypes.c_uint64
-r_reg_getv.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
+r_reg_getv.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
 r_reg_setv = _libr_reg.r_reg_setv
 r_reg_setv.restype = ctypes.c_uint64
-r_reg_setv.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char), ctypes.c_uint64]
+r_reg_setv.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char), ctypes.c_uint64]
 r_reg_32_to_64 = _libr_reg.r_reg_32_to_64
-r_reg_32_to_64.restype = POINTER_T(ctypes.c_char)
-r_reg_32_to_64.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
+r_reg_32_to_64.restype = ctypes.POINTER(ctypes.c_char)
+r_reg_32_to_64.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
 r_reg_64_to_32 = _libr_reg.r_reg_64_to_32
-r_reg_64_to_32.restype = POINTER_T(ctypes.c_char)
-r_reg_64_to_32.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
+r_reg_64_to_32.restype = ctypes.POINTER(ctypes.c_char)
+r_reg_64_to_32.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
 r_reg_get_name_by_type = _libr_reg.r_reg_get_name_by_type
-r_reg_get_name_by_type.restype = POINTER_T(ctypes.c_char)
-r_reg_get_name_by_type.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
+r_reg_get_name_by_type.restype = ctypes.POINTER(ctypes.c_char)
+r_reg_get_name_by_type.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
 r_reg_get_type = _libr_reg.r_reg_get_type
-r_reg_get_type.restype = POINTER_T(ctypes.c_char)
+r_reg_get_type.restype = ctypes.POINTER(ctypes.c_char)
 r_reg_get_type.argtypes = [ctypes.c_int32]
 r_reg_get_name = _libr_reg.r_reg_get_name
-r_reg_get_name.restype = POINTER_T(ctypes.c_char)
-r_reg_get_name.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32]
+r_reg_get_name.restype = ctypes.POINTER(ctypes.c_char)
+r_reg_get_name.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32]
 r_reg_get_role = _libr_reg.r_reg_get_role
-r_reg_get_role.restype = POINTER_T(ctypes.c_char)
+r_reg_get_role.restype = ctypes.POINTER(ctypes.c_char)
 r_reg_get_role.argtypes = [ctypes.c_int32]
 r_reg_get = _libr_reg.r_reg_get
-r_reg_get.restype = POINTER_T(struct_r_reg_item_t)
-r_reg_get.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char), ctypes.c_int32]
+r_reg_get.restype = ctypes.POINTER(struct_r_reg_item_t)
+r_reg_get.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char), ctypes.c_int32]
 r_reg_get_list = _libr_reg.r_reg_get_list
-r_reg_get_list.restype = POINTER_T(struct_r_list_t)
-r_reg_get_list.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32]
+r_reg_get_list.restype = ctypes.POINTER(struct_r_list_t)
+r_reg_get_list.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32]
 r_reg_get_at = _libr_reg.r_reg_get_at
-r_reg_get_at.restype = POINTER_T(struct_r_reg_item_t)
-r_reg_get_at.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32, ctypes.c_int32, ctypes.c_int32]
+r_reg_get_at.restype = ctypes.POINTER(struct_r_reg_item_t)
+r_reg_get_at.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32, ctypes.c_int32, ctypes.c_int32]
 r_reg_next_diff = _libr_reg.r_reg_next_diff
-r_reg_next_diff.restype = POINTER_T(struct_r_reg_item_t)
-r_reg_next_diff.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32, POINTER_T(ctypes.c_ubyte), ctypes.c_int32, POINTER_T(struct_r_reg_item_t), ctypes.c_int32]
+r_reg_next_diff.restype = ctypes.POINTER(struct_r_reg_item_t)
+r_reg_next_diff.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32, ctypes.POINTER(struct_r_reg_item_t), ctypes.c_int32]
 r_reg_reindex = _libr_reg.r_reg_reindex
 r_reg_reindex.restype = None
-r_reg_reindex.argtypes = [POINTER_T(struct_r_reg_t)]
+r_reg_reindex.argtypes = [ctypes.POINTER(struct_r_reg_t)]
 r_reg_index_get = _libr_reg.r_reg_index_get
-r_reg_index_get.restype = POINTER_T(struct_r_reg_item_t)
-r_reg_index_get.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32]
+r_reg_index_get.restype = ctypes.POINTER(struct_r_reg_item_t)
+r_reg_index_get.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32]
 r_reg_item_free = _libr_reg.r_reg_item_free
 r_reg_item_free.restype = None
-r_reg_item_free.argtypes = [POINTER_T(struct_r_reg_item_t)]
+r_reg_item_free.argtypes = [ctypes.POINTER(struct_r_reg_item_t)]
 r_reg_type_by_name = _libr_reg.r_reg_type_by_name
 r_reg_type_by_name.restype = ctypes.c_int32
-r_reg_type_by_name.argtypes = [POINTER_T(ctypes.c_char)]
+r_reg_type_by_name.argtypes = [ctypes.POINTER(ctypes.c_char)]
 r_reg_get_name_idx = _libr_reg.r_reg_get_name_idx
 r_reg_get_name_idx.restype = ctypes.c_int32
-r_reg_get_name_idx.argtypes = [POINTER_T(ctypes.c_char)]
+r_reg_get_name_idx.argtypes = [ctypes.POINTER(ctypes.c_char)]
 r_reg_cond_get = _libr_reg.r_reg_cond_get
-r_reg_cond_get.restype = POINTER_T(struct_r_reg_item_t)
-r_reg_cond_get.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
+r_reg_cond_get.restype = ctypes.POINTER(struct_r_reg_item_t)
+r_reg_cond_get.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
 r_reg_cond_apply = _libr_reg.r_reg_cond_apply
 r_reg_cond_apply.restype = None
-r_reg_cond_apply.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_flags_t)]
+r_reg_cond_apply.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_flags_t)]
 r_reg_cond_set = _libr_reg.r_reg_cond_set
 r_reg_cond_set.restype = ctypes.c_bool
-r_reg_cond_set.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char), ctypes.c_bool]
+r_reg_cond_set.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char), ctypes.c_bool]
 r_reg_cond_get_value = _libr_reg.r_reg_cond_get_value
 r_reg_cond_get_value.restype = ctypes.c_int32
-r_reg_cond_get_value.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
+r_reg_cond_get_value.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
 r_reg_cond_bits_set = _libr_reg.r_reg_cond_bits_set
 r_reg_cond_bits_set.restype = ctypes.c_bool
-r_reg_cond_bits_set.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32, POINTER_T(struct_r_reg_flags_t), ctypes.c_bool]
+r_reg_cond_bits_set.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32, ctypes.POINTER(struct_r_reg_flags_t), ctypes.c_bool]
 r_reg_cond_bits = _libr_reg.r_reg_cond_bits
 r_reg_cond_bits.restype = ctypes.c_int32
-r_reg_cond_bits.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32, POINTER_T(struct_r_reg_flags_t)]
+r_reg_cond_bits.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32, ctypes.POINTER(struct_r_reg_flags_t)]
 r_reg_cond_retrieve = _libr_reg.r_reg_cond_retrieve
-r_reg_cond_retrieve.restype = POINTER_T(struct_r_reg_flags_t)
-r_reg_cond_retrieve.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_flags_t)]
+r_reg_cond_retrieve.restype = ctypes.POINTER(struct_r_reg_flags_t)
+r_reg_cond_retrieve.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_flags_t)]
 r_reg_cond = _libr_reg.r_reg_cond
 r_reg_cond.restype = ctypes.c_int32
-r_reg_cond.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32]
+r_reg_cond.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32]
 r_reg_get_value = _libr_reg.r_reg_get_value
 r_reg_get_value.restype = ctypes.c_uint64
-r_reg_get_value.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t)]
-class struct__utX(ctypes.Structure):
+r_reg_get_value.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t)]
+class struct__utX(Structure):
     pass
 
-r_reg_get_value_big = _libr_reg.r_reg_get_value_big
-r_reg_get_value_big.restype = ctypes.c_uint64
-r_reg_get_value_big.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t), POINTER_T(struct__utX)]
-r_reg_get_value_by_role = _libr_reg.r_reg_get_value_by_role
-r_reg_get_value_by_role.restype = ctypes.c_uint64
-r_reg_get_value_by_role.argtypes = [POINTER_T(struct_r_reg_t), RRegisterId]
-r_reg_set_value = _libr_reg.r_reg_set_value
-r_reg_set_value.restype = ctypes.c_bool
-r_reg_set_value.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t), ctypes.c_uint64]
-r_reg_set_value_by_role = _libr_reg.r_reg_set_value_by_role
-r_reg_set_value_by_role.restype = ctypes.c_bool
-r_reg_set_value_by_role.argtypes = [POINTER_T(struct_r_reg_t), RRegisterId, ctypes.c_uint64]
-r_reg_get_float = _libr_reg.r_reg_get_float
-r_reg_get_float.restype = ctypes.c_float
-r_reg_get_float.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t)]
-r_reg_set_float = _libr_reg.r_reg_set_float
-r_reg_set_float.restype = ctypes.c_bool
-r_reg_set_float.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t), ctypes.c_float]
-r_reg_get_double = _libr_reg.r_reg_get_double
-r_reg_get_double.restype = ctypes.c_double
-r_reg_get_double.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t)]
-r_reg_set_double = _libr_reg.r_reg_set_double
-r_reg_set_double.restype = ctypes.c_bool
-r_reg_set_double.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t), ctypes.c_double]
-r_reg_get_longdouble = _libr_reg.r_reg_get_longdouble
-r_reg_get_longdouble.restype = c_long_double_t
-r_reg_get_longdouble.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t)]
-r_reg_set_longdouble = _libr_reg.r_reg_set_longdouble
-r_reg_set_longdouble.restype = ctypes.c_bool
-r_reg_set_longdouble.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t), c_long_double_t]
-r_reg_get_bvalue = _libr_reg.r_reg_get_bvalue
-r_reg_get_bvalue.restype = POINTER_T(ctypes.c_char)
-r_reg_get_bvalue.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t)]
-r_reg_set_bvalue = _libr_reg.r_reg_set_bvalue
-r_reg_set_bvalue.restype = ctypes.c_uint64
-r_reg_set_bvalue.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t), POINTER_T(ctypes.c_char)]
-r_reg_set_pack = _libr_reg.r_reg_set_pack
-r_reg_set_pack.restype = ctypes.c_int32
-r_reg_set_pack.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t), ctypes.c_int32, ctypes.c_int32, ctypes.c_uint64]
-r_reg_get_pack = _libr_reg.r_reg_get_pack
-r_reg_get_pack.restype = ctypes.c_uint64
-r_reg_get_pack.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(struct_r_reg_item_t), ctypes.c_int32, ctypes.c_int32]
-r_reg_get_bytes = _libr_reg.r_reg_get_bytes
-r_reg_get_bytes.restype = POINTER_T(ctypes.c_ubyte)
-r_reg_get_bytes.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32, POINTER_T(ctypes.c_int32)]
-r_reg_set_bytes = _libr_reg.r_reg_set_bytes
-r_reg_set_bytes.restype = ctypes.c_bool
-r_reg_set_bytes.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32, POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
-r_reg_read_regs = _libr_reg.r_reg_read_regs
-r_reg_read_regs.restype = ctypes.c_bool
-r_reg_read_regs.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_ubyte), ctypes.c_int32]
-r_reg_arena_set_bytes = _libr_reg.r_reg_arena_set_bytes
-r_reg_arena_set_bytes.restype = ctypes.c_int32
-r_reg_arena_set_bytes.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_char)]
-r_reg_arena_new = _libr_reg.r_reg_arena_new
-r_reg_arena_new.restype = POINTER_T(struct_r_reg_arena_t)
-r_reg_arena_new.argtypes = [ctypes.c_int32]
-r_reg_arena_free = _libr_reg.r_reg_arena_free
-r_reg_arena_free.restype = None
-r_reg_arena_free.argtypes = [POINTER_T(struct_r_reg_arena_t)]
-r_reg_fit_arena = _libr_reg.r_reg_fit_arena
-r_reg_fit_arena.restype = ctypes.c_int32
-r_reg_fit_arena.argtypes = [POINTER_T(struct_r_reg_t)]
-r_reg_arena_swap = _libr_reg.r_reg_arena_swap
-r_reg_arena_swap.restype = None
-r_reg_arena_swap.argtypes = [POINTER_T(struct_r_reg_t), ctypes.c_int32]
-r_reg_arena_push = _libr_reg.r_reg_arena_push
-r_reg_arena_push.restype = ctypes.c_int32
-r_reg_arena_push.argtypes = [POINTER_T(struct_r_reg_t)]
-r_reg_arena_pop = _libr_reg.r_reg_arena_pop
-r_reg_arena_pop.restype = None
-r_reg_arena_pop.argtypes = [POINTER_T(struct_r_reg_t)]
-r_reg_arena_zero = _libr_reg.r_reg_arena_zero
-r_reg_arena_zero.restype = None
-r_reg_arena_zero.argtypes = [POINTER_T(struct_r_reg_t)]
-r_reg_arena_peek = _libr_reg.r_reg_arena_peek
-r_reg_arena_peek.restype = POINTER_T(ctypes.c_ubyte)
-r_reg_arena_peek.argtypes = [POINTER_T(struct_r_reg_t)]
-r_reg_arena_poke = _libr_reg.r_reg_arena_poke
-r_reg_arena_poke.restype = None
-r_reg_arena_poke.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_ubyte)]
-r_reg_arena_dup = _libr_reg.r_reg_arena_dup
-r_reg_arena_dup.restype = POINTER_T(ctypes.c_ubyte)
-r_reg_arena_dup.argtypes = [POINTER_T(struct_r_reg_t), POINTER_T(ctypes.c_ubyte)]
-r_reg_cond_to_string = _libr_reg.r_reg_cond_to_string
-r_reg_cond_to_string.restype = POINTER_T(ctypes.c_char)
-r_reg_cond_to_string.argtypes = [ctypes.c_int32]
-r_reg_cond_from_string = _libr_reg.r_reg_cond_from_string
-r_reg_cond_from_string.restype = ctypes.c_int32
-r_reg_cond_from_string.argtypes = [POINTER_T(ctypes.c_char)]
-r_reg_arena_shrink = _libr_reg.r_reg_arena_shrink
-r_reg_arena_shrink.restype = None
-r_reg_arena_shrink.argtypes = [POINTER_T(struct_r_reg_t)]
-class struct__ut80(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
-    ('Low', ctypes.c_uint64),
-    ('High', ctypes.c_uint16),
-    ('PADDING_0', ctypes.c_ubyte * 6),
-     ]
+class struct__ut96(Structure):
+    pass
 
-class struct__ut96(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+struct__ut96._pack_ = 1 # source:False
+struct__ut96._fields_ = [
     ('Low', ctypes.c_uint64),
     ('High', ctypes.c_uint32),
     ('PADDING_0', ctypes.c_ubyte * 4),
-     ]
+]
 
-class struct__ut128(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+class struct__ut80(Structure):
+    pass
+
+struct__ut80._pack_ = 1 # source:False
+struct__ut80._fields_ = [
+    ('Low', ctypes.c_uint64),
+    ('High', ctypes.c_uint16),
+    ('PADDING_0', ctypes.c_ubyte * 6),
+]
+
+class struct__ut256(Structure):
+    pass
+
+class struct__ut128(Structure):
+    pass
+
+struct__ut128._pack_ = 1 # source:False
+struct__ut128._fields_ = [
     ('Low', ctypes.c_uint64),
     ('High', ctypes.c_int64),
-     ]
+]
 
-class struct__ut256(ctypes.Structure):
-    _pack_ = True # source:False
-    _fields_ = [
+struct__ut256._pack_ = 1 # source:False
+struct__ut256._fields_ = [
     ('Low', struct__ut128),
     ('High', struct__ut128),
-     ]
+]
 
-struct__utX._pack_ = True # source:False
+struct__utX._pack_ = 1 # source:False
 struct__utX._fields_ = [
     ('v80', struct__ut80),
     ('v96', struct__ut96),
@@ -529,6 +565,99 @@ struct__utX._fields_ = [
     ('v256', struct__ut256),
 ]
 
+r_reg_get_value_big = _libr_reg.r_reg_get_value_big
+r_reg_get_value_big.restype = ctypes.c_uint64
+r_reg_get_value_big.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t), ctypes.POINTER(struct__utX)]
+r_reg_get_value_by_role = _libr_reg.r_reg_get_value_by_role
+r_reg_get_value_by_role.restype = ctypes.c_uint64
+r_reg_get_value_by_role.argtypes = [ctypes.POINTER(struct_r_reg_t), RRegisterId]
+r_reg_set_value = _libr_reg.r_reg_set_value
+r_reg_set_value.restype = ctypes.c_bool
+r_reg_set_value.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t), ctypes.c_uint64]
+r_reg_set_value_by_role = _libr_reg.r_reg_set_value_by_role
+r_reg_set_value_by_role.restype = ctypes.c_bool
+r_reg_set_value_by_role.argtypes = [ctypes.POINTER(struct_r_reg_t), RRegisterId, ctypes.c_uint64]
+r_reg_get_float = _libr_reg.r_reg_get_float
+r_reg_get_float.restype = ctypes.c_float
+r_reg_get_float.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t)]
+r_reg_set_float = _libr_reg.r_reg_set_float
+r_reg_set_float.restype = ctypes.c_bool
+r_reg_set_float.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t), ctypes.c_float]
+r_reg_get_double = _libr_reg.r_reg_get_double
+r_reg_get_double.restype = ctypes.c_double
+r_reg_get_double.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t)]
+r_reg_set_double = _libr_reg.r_reg_set_double
+r_reg_set_double.restype = ctypes.c_bool
+r_reg_set_double.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t), ctypes.c_double]
+r_reg_get_longdouble = _libr_reg.r_reg_get_longdouble
+r_reg_get_longdouble.restype = c_long_double_t
+r_reg_get_longdouble.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t)]
+r_reg_set_longdouble = _libr_reg.r_reg_set_longdouble
+r_reg_set_longdouble.restype = ctypes.c_bool
+r_reg_set_longdouble.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t), c_long_double_t]
+r_reg_get_bvalue = _libr_reg.r_reg_get_bvalue
+r_reg_get_bvalue.restype = ctypes.POINTER(ctypes.c_char)
+r_reg_get_bvalue.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t)]
+r_reg_set_bvalue = _libr_reg.r_reg_set_bvalue
+r_reg_set_bvalue.restype = ctypes.c_uint64
+r_reg_set_bvalue.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t), ctypes.POINTER(ctypes.c_char)]
+r_reg_set_pack = _libr_reg.r_reg_set_pack
+r_reg_set_pack.restype = ctypes.c_int32
+r_reg_set_pack.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t), ctypes.c_int32, ctypes.c_int32, ctypes.c_uint64]
+r_reg_get_pack = _libr_reg.r_reg_get_pack
+r_reg_get_pack.restype = ctypes.c_uint64
+r_reg_get_pack.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struct_r_reg_item_t), ctypes.c_int32, ctypes.c_int32]
+r_reg_get_bytes = _libr_reg.r_reg_get_bytes
+r_reg_get_bytes.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_reg_get_bytes.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32, ctypes.POINTER(ctypes.c_int32)]
+r_reg_set_bytes = _libr_reg.r_reg_set_bytes
+r_reg_set_bytes.restype = ctypes.c_bool
+r_reg_set_bytes.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
+r_reg_read_regs = _libr_reg.r_reg_read_regs
+r_reg_read_regs.restype = ctypes.c_bool
+r_reg_read_regs.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
+r_reg_arena_set_bytes = _libr_reg.r_reg_arena_set_bytes
+r_reg_arena_set_bytes.restype = ctypes.c_int32
+r_reg_arena_set_bytes.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_char)]
+r_reg_arena_new = _libr_reg.r_reg_arena_new
+r_reg_arena_new.restype = ctypes.POINTER(struct_r_reg_arena_t)
+r_reg_arena_new.argtypes = [ctypes.c_int32]
+r_reg_arena_free = _libr_reg.r_reg_arena_free
+r_reg_arena_free.restype = None
+r_reg_arena_free.argtypes = [ctypes.POINTER(struct_r_reg_arena_t)]
+r_reg_fit_arena = _libr_reg.r_reg_fit_arena
+r_reg_fit_arena.restype = ctypes.c_int32
+r_reg_fit_arena.argtypes = [ctypes.POINTER(struct_r_reg_t)]
+r_reg_arena_swap = _libr_reg.r_reg_arena_swap
+r_reg_arena_swap.restype = None
+r_reg_arena_swap.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.c_int32]
+r_reg_arena_push = _libr_reg.r_reg_arena_push
+r_reg_arena_push.restype = ctypes.c_int32
+r_reg_arena_push.argtypes = [ctypes.POINTER(struct_r_reg_t)]
+r_reg_arena_pop = _libr_reg.r_reg_arena_pop
+r_reg_arena_pop.restype = None
+r_reg_arena_pop.argtypes = [ctypes.POINTER(struct_r_reg_t)]
+r_reg_arena_zero = _libr_reg.r_reg_arena_zero
+r_reg_arena_zero.restype = None
+r_reg_arena_zero.argtypes = [ctypes.POINTER(struct_r_reg_t)]
+r_reg_arena_peek = _libr_reg.r_reg_arena_peek
+r_reg_arena_peek.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_reg_arena_peek.argtypes = [ctypes.POINTER(struct_r_reg_t)]
+r_reg_arena_poke = _libr_reg.r_reg_arena_poke
+r_reg_arena_poke.restype = None
+r_reg_arena_poke.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_ubyte)]
+r_reg_arena_dup = _libr_reg.r_reg_arena_dup
+r_reg_arena_dup.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_reg_arena_dup.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(ctypes.c_ubyte)]
+r_reg_cond_to_string = _libr_reg.r_reg_cond_to_string
+r_reg_cond_to_string.restype = ctypes.POINTER(ctypes.c_char)
+r_reg_cond_to_string.argtypes = [ctypes.c_int32]
+r_reg_cond_from_string = _libr_reg.r_reg_cond_from_string
+r_reg_cond_from_string.restype = ctypes.c_int32
+r_reg_cond_from_string.argtypes = [ctypes.POINTER(ctypes.c_char)]
+r_reg_arena_shrink = _libr_reg.r_reg_arena_shrink
+r_reg_arena_shrink.restype = None
+r_reg_arena_shrink.argtypes = [ctypes.POINTER(struct_r_reg_t)]
 __all__ = \
     ['RReg', 'RRegArena', 'RRegFlags', 'RRegItem', 'RRegSet',
     'RRegisterId', 'RRegisterId__enumvalues', 'RRegisterType',
@@ -560,7 +689,7 @@ __all__ = \
     'r_reg_get_pack', 'r_reg_get_role', 'r_reg_get_type',
     'r_reg_get_value', 'r_reg_get_value_big',
     'r_reg_get_value_by_role', 'r_reg_getv', 'r_reg_index_get',
-    'r_reg_is_readonly', 'r_reg_item_free', 'r_reg_new',
+    'r_reg_init', 'r_reg_is_readonly', 'r_reg_item_free', 'r_reg_new',
     'r_reg_next_diff', 'r_reg_parse_gdb_profile',
     'r_reg_profile_to_cc', 'r_reg_read_regs', 'r_reg_regset_get',
     'r_reg_reindex', 'r_reg_set_bvalue', 'r_reg_set_bytes',

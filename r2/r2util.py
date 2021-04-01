@@ -5,52 +5,55 @@
 # LONGDOUBLE_SIZE is: 16
 #
 import ctypes
+from .r2libs import r_anal as _libr_anal
+from .r2libs import r_asm as _libr_asm
+from .r2libs import r_bin as _libr_bin
+from .r2libs import r_bp as _libr_bp
+from .r2libs import r_config as _libr_config
+from .r2libs import r_cons as _libr_cons
+from .r2libs import r_core as _libr_core
+from .r2libs import r_crypto as _libr_crypto
+from .r2libs import r_debug as _libr_debug
+from .r2libs import r_egg as _libr_egg
+from .r2libs import r_flag as _libr_flag
+from .r2libs import r_fs as _libr_fs
+from .r2libs import r_hash as _libr_hash
+from .r2libs import r_io as _libr_io
+from .r2libs import r_lang as _libr_lang
+from .r2libs import r_magic as _libr_magic
+from .r2libs import r_main as _libr_main
+from .r2libs import r_parse as _libr_parse
+from .r2libs import r_reg as _libr_reg
+from .r2libs import r_search as _libr_search
+from .r2libs import r_socket as _libr_socket
+from .r2libs import r_syscall as _libr_syscall
 from .r2libs import r_util as _libr_util
 
 
-# if local wordsize is same as target, keep ctypes pointer function.
-if ctypes.sizeof(ctypes.c_void_p) == 8:
-    POINTER_T = ctypes.POINTER
-else:
-    # required to access _ctypes
-    import _ctypes
-    # Emulate a pointer class using the approriate c_int32/c_int64 type
-    # The new class should have :
-    # ['__module__', 'from_param', '_type_', '__dict__', '__weakref__', '__doc__']
-    # but the class should be submitted to a unique instance for each base type
-    # to that if A == B, POINTER_T(A) == POINTER_T(B)
-    ctypes._pointer_t_type_cache = {}
-    def POINTER_T(pointee):
-        # a pointer should have the same length as LONG
-        fake_ptr_base_type = ctypes.c_uint64 
-        # specific case for c_void_p
-        if pointee is None: # VOID pointer type. c_void_p.
-            pointee = type(None) # ctypes.c_void_p # ctypes.c_ulong
-            clsname = 'c_void'
-        else:
-            clsname = pointee.__name__
-        if clsname in ctypes._pointer_t_type_cache:
-            return ctypes._pointer_t_type_cache[clsname]
-        # make template
-        class _T(_ctypes._SimpleCData,):
-            _type_ = 'L'
-            _subtype_ = pointee
-            def _sub_addr_(self):
-                return self.value
-            def __repr__(self):
-                return '%s(%d)'%(clsname, self.value)
-            def contents(self):
-                raise TypeError('This is not a ctypes pointer.')
-            def __init__(self, **args):
-                raise TypeError('This is not a ctypes pointer. It is not instanciable.')
-        _class = type('LP_%d_%s'%(8, clsname), (_T,),{}) 
-        ctypes._pointer_t_type_cache[clsname] = _class
-        return _class
+_libraries = {}
+def string_cast(char_pointer, encoding='utf-8', errors='strict'):
+    value = ctypes.cast(char_pointer, ctypes.c_char_p).value
+    if value is not None and encoding is not None:
+        value = value.decode(encoding, errors=errors)
+    return value
+
+
+def char_pointer_cast(string, encoding='utf-8'):
+    if encoding is not None:
+        try:
+            string = string.encode(encoding)
+        except AttributeError:
+            # In Python3, bytes has no encode attribute
+            pass
+    string = ctypes.c_char_p(string)
+    return ctypes.cast(string, ctypes.POINTER(ctypes.c_char))
+
+
 
 
 
 r_util_version = _libr_util.r_util_version
-r_util_version.restype = POINTER_T(ctypes.c_char)
+r_util_version.restype = ctypes.POINTER(ctypes.c_char)
 r_util_version.argtypes = []
 __all__ = \
     ['r_util_version']
