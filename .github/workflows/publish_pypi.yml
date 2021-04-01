@@ -34,6 +34,9 @@ jobs:
     - name: Generate bindings
       run: cd tools && python3 gen.py -O ../r2/ -B ../radare2/pyr2installdir/ && cd ..
     
+    - name: Set up git.
+      run: git config --global user.email mio@lazym.io && git config --global user.name action
+
     - name: Commit new bindings
       run: git status | grep -q "changes"  && git add r2/ && git commit -m "Bindings generated on `date`"
 
