@@ -140,6 +140,8 @@ def build_radare2():
         if py is None:
             raise RuntimeError("Can't find a python in your path!")
         args += py
+    else:
+        args += ['python3']
     args += ["./sys/meson.py"]
     if not DEBUG:
         args += ["--release"]
