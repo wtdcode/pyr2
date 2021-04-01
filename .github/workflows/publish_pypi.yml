@@ -8,6 +8,9 @@ jobs:
   generate:
     runs-on: ubuntu-20.04
     steps:
+    - name: Set up system path for python libs.
+      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
     - name: Set up python and libclang.
       run: sudo apt update && sudo apt install python3 python3-pip libclang-11-dev -y
     
@@ -48,6 +51,9 @@ jobs:
         os: [windows-latest, macos-latest, ubuntu-latest]
         platform: [x64]
     steps:
+    - name: Set up system path for python libs.
+      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
     - uses: actions/checkout@v2
       with:
         submodules: recursive
