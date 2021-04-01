@@ -333,6 +333,9 @@ RIOUndoWrite = struct_r_io_undo_w_t
 class struct_r_io_t(Structure):
     pass
 
+class struct_ls_t(Structure):
+    pass
+
 class struct_ptrace_wrap_instance_t(Structure):
     pass
 
@@ -346,9 +349,6 @@ class struct_r_id_storage_t(Structure):
     pass
 
 class struct_r_cache_t(Structure):
-    pass
-
-class struct_ls_t(Structure):
     pass
 
 class struct_r_id_pool_t(Structure):

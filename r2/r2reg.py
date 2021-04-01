@@ -539,9 +539,6 @@ struct__ut80._fields_ = [
     ('PADDING_0', ctypes.c_ubyte * 6),
 ]
 
-class struct__ut256(Structure):
-    pass
-
 class struct__ut128(Structure):
     pass
 
@@ -551,11 +548,12 @@ struct__ut128._fields_ = [
     ('High', ctypes.c_int64),
 ]
 
-struct__ut256._pack_ = 1 # source:False
-struct__ut256._fields_ = [
+class struct__ut256(Structure):
+    _pack_ = 1 # source:False
+    _fields_ = [
     ('Low', struct__ut128),
     ('High', struct__ut128),
-]
+     ]
 
 struct__utX._pack_ = 1 # source:False
 struct__utX._fields_ = [

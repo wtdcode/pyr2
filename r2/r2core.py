@@ -570,10 +570,10 @@ class struct_r_buf_t(Structure):
 class struct_r_print_t(Structure):
     pass
 
-class struct_r_asm_t(Structure):
+class struct_r_cons_t(Structure):
     pass
 
-class struct_r_cons_t(Structure):
+class struct_r_asm_t(Structure):
     pass
 
 class struct_r_core_project_t(Structure):
