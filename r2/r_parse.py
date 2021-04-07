@@ -194,10 +194,10 @@ struct_r_list_iter_t._fields_ = [
 class struct_r_anal_function_t(Structure):
     pass
 
-class struct_r_anal_t(Structure):
+class struct_ht_up_t(Structure):
     pass
 
-class struct_ht_up_t(Structure):
+class struct_r_anal_t(Structure):
     pass
 
 class struct_r_anal_diff_t(Structure):
@@ -1078,6 +1078,9 @@ struct_ls_iter_t._fields_ = [
     ('p', ctypes.POINTER(struct_ls_iter_t)),
 ]
 
+class struct_r_id_pool_t(Structure):
+    pass
+
 class struct_ptrace_wrap_instance_t(Structure):
     pass
 
@@ -1085,9 +1088,6 @@ class struct_r_id_storage_t(Structure):
     pass
 
 class struct_r_cache_t(Structure):
-    pass
-
-class struct_r_id_pool_t(Structure):
     pass
 
 class struct_r_skyline_t(Structure):

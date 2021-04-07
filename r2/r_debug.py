@@ -1382,6 +1382,9 @@ struct_r_bp_arch_t._fields_ = [
     ('bytes', ctypes.POINTER(ctypes.c_ubyte)),
 ]
 
+class struct_r_buf_t(Structure):
+    pass
+
 class struct_r_debug_desc_plugin_t(Structure):
     pass
 
@@ -1395,9 +1398,6 @@ struct_r_debug_desc_plugin_t._fields_ = [
     ('dup', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.c_int32, ctypes.c_int32)),
     ('list', ctypes.CFUNCTYPE(ctypes.POINTER(struct_r_list_t), ctypes.c_int32)),
 ]
-
-class struct_r_buf_t(Structure):
-    pass
 
 class struct_r_debug_info_t(Structure):
     pass
@@ -2341,10 +2341,10 @@ struct_r_bin_section_t._fields_ = [
     ('is_segment', ctypes.c_bool),
 ]
 
-class struct_r_anal_esil_trace_t(Structure):
+class struct_r_anal_esil_handler_t(Structure):
     pass
 
-class struct_r_anal_esil_handler_t(Structure):
+class struct_r_anal_esil_trace_t(Structure):
     pass
 
 class struct_r_anal_reil(Structure):
