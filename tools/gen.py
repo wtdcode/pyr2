@@ -65,8 +65,6 @@ def clang2py_common_args(pargs):
     for _, v in libs_path.items():
         args += ["-l", str(v.resolve())]
     clang_args = gen_clang_include_args(pargs.build)
-    # Workaround for Windows build.
-    clang_args += ["-DHAVE_PTRACE=0"]
     args += ["--clang-args", " ".join(clang_args)]
     return args
 

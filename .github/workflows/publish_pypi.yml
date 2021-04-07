@@ -32,7 +32,7 @@ jobs:
       run: git clone https://github.com/radareorg/radare2
 
     - name: Build radare2
-      run: python3 setup.py bdist_wheel
+      run: env BINDING=1 python3 setup.py build
     
     - name: Generate bindings
       run: cd tools && python3 gen.py -O ../r2/ -B ../radare2/pyr2installdir/ && cd ..
