@@ -104,8 +104,6 @@ def expand_util(pargs):
     for header in sub_utils_headers:
         with open(Path(pargs.build) / "include" / "libr" / "r_util" / header) as f:
             content = content.replace(f'#include "r_util/{header}"', f.read())
-        with open(f"/tmp/r_util_{header}", "w+") as f:
-            f.write(content)
     with open(r_util_gen_path, "w+") as f:
         f.write(content)
 
