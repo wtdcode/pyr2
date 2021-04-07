@@ -25,6 +25,17 @@ class RAPITest(unittest.TestCase):
         r2anal = ctypes.cast(ctypes.addressof(r2c.contents.anal.contents), ctypes.POINTER(r2.r_anal.struct_r_anal_t))
         print(f"We have {r2.r_anal.r_anal_xrefs_count(r2anal)} xrefs!")
 
+    def test_r_asm(self):
+        buffer = b"\x90\x90\x90"
+        buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ubyte))
+        r2c = r2.r_core.r_core_new()
+        fh = r2.r_core.r_core_file_open(r2c, ctypes.create_string_buffer(b"/bin/ls"), 0b101, 0)
+        r2.r_core.r_core_bin_load(r2c, ctypes.create_string_buffer(b"/bin/ls"), (1<<64) - 1)
+        r2asm = ctypes.cast(r2c.contents.rasm, ctypes.POINTER(r2.r_asm.struct_r_asm_t))
+        asmcode = r2.r_asm.r_asm_mdisassemble(r2asm, buffer, 3)
+        disasm_output = ctypes.string_at(asmcode.contents.assembly).decode('utf-8')
+        self.assertEqual(disasm_output, "nop\nnop\nnop\n")
+
     def test_r_util_json(self):
         json_str = b'{"key" : "value"}'
         rjson = r2.r_util.r_json_parse(json_str)
