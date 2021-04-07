@@ -45,7 +45,7 @@ def gen_clang_include_args(builddir):
     include_root = Path(builddir) / "include" / "libr"
     includes = []
     _impl(include_root)
-    return " ".join([f"-I{str(p.resolve())}" for p in includes])
+    return [f"-I{str(p.resolve())}" for p in includes]
 
 def verbose_call(*args, **kwargs):
     print(" ".join([f'"{a}"' for a in args[0]]))
@@ -67,7 +67,7 @@ def clang2py_common_args(pargs):
     clang_args = gen_clang_include_args(pargs.build)
     # Workaround for Windows build.
     clang_args += ["-DHAVE_PTRACE=0"]
-    args += ["--clang-args", clang_args]
+    args += ["--clang-args", " ".join(clang_args)]
     return args
 
 def clang2py_parse_header(pargs, header_path):
