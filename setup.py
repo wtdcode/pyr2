@@ -37,8 +37,10 @@ def detect_python_on_windows():
     return None
 
 def clean_builds():
-    shutil.rmtree(Path(ROOT_DIR) / "build")
-    shutil.rmtree(Path(ROOT_DIR) / "r2" / "libr")
+    shutil.rmtree(Path(ROOT_DIR) / "build", ignore_errors=True)
+    shutil.rmtree(Path(ROOT_DIR) / "r2" / "libr", ignore_errors=True)
+    shutil.rmtree(Path(ROOT_DIR) / "radare2" / "pyr2installdir", ignore_errors=True)
+    shutil.rmtree(Path(ROOT_DIR) / "radare2" / "pyr2build", ignore_errors=True)
 
 def radare2_exists():
     return (Path(ROOT_DIR) / "radare2" / ".git").exists()
