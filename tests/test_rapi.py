@@ -22,7 +22,11 @@ class RAPITest(unittest.TestCase):
         r2c = self.__get_r_core()
         r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"ieq"))
         r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"aaa"))
-        print(f'Disasm 1 instruction:\n{ctypes.string_at(r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"pd 1"))).decode("utf-8")}')
+        if sys.platform != "win32":
+            print(f'Disasm 1 instruction:\n{ctypes.string_at(r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"pd 1"))).decode("utf-8")}')
+        else:
+            # CMD doesn't support colors.
+            print(f'Disasm 1 instruction:\n{ctypes.string_at(r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"pdj 1"))).decode("utf-8")}')
         r2.r_core.r_core_free(r2c)
 
     def test_r_anal(self):
