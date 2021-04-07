@@ -36,7 +36,7 @@ libs = [
     "util",
 ]
 
-def gen_clang_args(builddir):
+def gen_clang_include_args(builddir):
     def _impl(dir: Path):
         includes.append(dir)
         for child in dir.iterdir():
@@ -64,7 +64,10 @@ def clang2py_common_args(pargs):
     args += ["-v"]
     for _, v in libs_path.items():
         args += ["-l", str(v.resolve())]
-    args += ["--clang-args", gen_clang_args(pargs.build)]
+    clang_args = gen_clang_include_args(pargs.build)
+    # Workaround for Windows build.
+    clang_args += ["-DHAVE_PTRACE=0"]
+    args += ["--clang-args", clang_args]
     return args
 
 def clang2py_parse_header(pargs, header_path):
