@@ -95,17 +95,36 @@ def post_handle(binding_content, lib_name):
 # We have to expand r_util manually.
 # Note that we don't need to expand headers deeper since we only focus on R_API.
 # FIXME: Any better approach?
+# NOTE: Some headers like "util/r_json.h" are not included in r_util.h.
 def expand_util(pargs):
     r_util_path = Path(pargs.build) / "include" / "libr" / "r_util.h"
     r_util_gen_path = Path(pargs.build) / "include" / "libr" / "r_util_gen.h"
     with open(r_util_path, "r+") as f:
         content = f.read()
-    sub_utils_headers = re.findall(r'\n#include "r_util/(r_.*.h)"', content)
-    for header in sub_utils_headers:
-        with open(Path(pargs.build) / "include" / "libr" / "r_util" / header) as f:
-            content = content.replace(f'#include "r_util/{header}"', f.read())
+    sub_util_headers = re.findall(r'\n#include "(r_util/r_.*.h)"', content)
+    sub_util_headers.extend(re.findall(r"#include <(r_.*h)>", content))
+    output_util = ""
+    for ln in content.splitlines(keepends=True):
+        headers = re.findall(r'^#include "(r_util/r_.*.h)"', ln)
+        if len(headers) == 0:
+            headers = re.findall(r"^#include <(r_.*h)>", ln)
+        if len(headers) == 0 and "r_util/r_print.h" in ln:
+            headers = [
+                'r_util/r_annotated_code.h',
+                'r_util/r_graph_drawable.h',
+                'r_util/r_json.h',
+                'r_util/r_print.h',
+                'r_util/r_str_util.h'
+            ]
+        if len(headers) == 0:
+            output_util += ln
+        else:
+            for header in headers:
+                with open(Path(pargs.build) / "include" / "libr" / header) as f:
+                    output_util += f.read()
+                    output_util += "\n"
     with open(r_util_gen_path, "w+") as f:
-        f.write(content)
+        f.write(output_util)
 
 def handle_lib(lib, pargs):
     if lib == "util":
