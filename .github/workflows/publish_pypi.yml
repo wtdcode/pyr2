@@ -28,6 +28,9 @@ jobs:
     - name: Install meson
       run: python3 -m pip install setuptools wheel meson
     
+    - name: Clone latest radare2
+      run: git clone https://github.com/radareorg/radare2
+
     - name: Build radare2
       run: python3 setup.py bdist_wheel
     
@@ -92,6 +95,9 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install setuptools wheel meson
+
+    - name: Clone latest radare2
+      run: git clone https://github.com/radareorg/radare2
 
     - name: Remove link.exe to avoid conflicts and Build distribution 📦 on Windows
       if: matrix.os == 'windows-latest'
