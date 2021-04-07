@@ -1245,13 +1245,13 @@ struct_r_queue_t._fields_ = [
     ('size', ctypes.c_uint32),
 ]
 
-class struct_ptrace_wrap_instance_t(Structure):
-    pass
-
 class struct_r_event_t(Structure):
     pass
 
 class struct_r_cache_t(Structure):
+    pass
+
+class struct_ptrace_wrap_instance_t(Structure):
     pass
 
 class struct_r_core_bind_t(Structure):
@@ -2262,10 +2262,10 @@ struct_r_anal_plugin_t._fields_ = [
     ('esil_fini', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_esil_t))),
 ]
 
-class struct_r_anal_value_t(Structure):
+class struct_r_anal_switch_obj_t(Structure):
     pass
 
-class struct_r_anal_switch_obj_t(Structure):
+class struct_r_anal_value_t(Structure):
     pass
 
 

@@ -173,7 +173,6 @@ class Union(ctypes.Union, AsDictMixin):
 
 
 
-_libr_core = ctypes.CDLL('/home/runner/work/pyr2/pyr2/radare2/pyr2installdir/lib/x86_64-linux-gnu/libr_core.so.5.2.0')
 
 
 PrintfCallback = ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(ctypes.c_char))
@@ -3522,6 +3521,142 @@ r_pkcs7_free_spcinfo.argtypes = [ctypes.POINTER(struct_c__SA_SpcIndirectDataCont
 r_protobuf_decode = _libr_util.r_protobuf_decode
 r_protobuf_decode.restype = ctypes.POINTER(ctypes.c_char)
 r_protobuf_decode.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64, ctypes.c_bool]
+class struct_r_anal_graph_node_info_t(Structure):
+    pass
+
+struct_r_anal_graph_node_info_t._pack_ = 1 # source:False
+struct_r_anal_graph_node_info_t._fields_ = [
+    ('title', ctypes.POINTER(ctypes.c_char)),
+    ('body', ctypes.POINTER(ctypes.c_char)),
+    ('offset', ctypes.c_uint64),
+]
+
+RGraphNodeInfo = struct_r_anal_graph_node_info_t
+r_graph_free_node_info = _libr_util.r_graph_free_node_info
+r_graph_free_node_info.restype = None
+r_graph_free_node_info.argtypes = [ctypes.POINTER(None)]
+r_graph_create_node_info = _libr_util.r_graph_create_node_info
+r_graph_create_node_info.restype = ctypes.POINTER(struct_r_anal_graph_node_info_t)
+r_graph_create_node_info.argtypes = [ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char), ctypes.c_uint64]
+class struct_r_graph_node_t(Structure):
+    pass
+
+struct_r_graph_node_t._pack_ = 1 # source:False
+struct_r_graph_node_t._fields_ = [
+    ('idx', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+    ('data', ctypes.POINTER(None)),
+    ('out_nodes', ctypes.POINTER(struct_r_list_t)),
+    ('in_nodes', ctypes.POINTER(struct_r_list_t)),
+    ('all_neighbours', ctypes.POINTER(struct_r_list_t)),
+    ('free', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
+]
+
+class struct_r_graph_t(Structure):
+    pass
+
+struct_r_graph_t._pack_ = 1 # source:False
+struct_r_graph_t._fields_ = [
+    ('n_nodes', ctypes.c_uint32),
+    ('n_edges', ctypes.c_uint32),
+    ('last_index', ctypes.c_int32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+    ('nodes', ctypes.POINTER(struct_r_list_t)),
+]
+
+r_graph_add_node_info = _libr_util.r_graph_add_node_info
+r_graph_add_node_info.restype = ctypes.POINTER(struct_r_graph_node_t)
+r_graph_add_node_info.argtypes = [ctypes.POINTER(struct_r_graph_t), ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char), ctypes.c_uint64]
+r_graph_drawable_to_dot = _libr_util.r_graph_drawable_to_dot
+r_graph_drawable_to_dot.restype = ctypes.POINTER(ctypes.c_char)
+r_graph_drawable_to_dot.argtypes = [ctypes.POINTER(struct_r_graph_t), ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char)]
+r_graph_drawable_to_json = _libr_util.r_graph_drawable_to_json
+r_graph_drawable_to_json.restype = None
+r_graph_drawable_to_json.argtypes = [ctypes.POINTER(struct_r_graph_t), ctypes.POINTER(struct_pj_t), ctypes.c_bool]
+
+# values for enumeration 'r_json_type_t'
+r_json_type_t__enumvalues = {
+    0: 'R_JSON_NULL',
+    1: 'R_JSON_OBJECT',
+    2: 'R_JSON_ARRAY',
+    3: 'R_JSON_STRING',
+    4: 'R_JSON_INTEGER',
+    5: 'R_JSON_DOUBLE',
+    6: 'R_JSON_BOOLEAN',
+}
+R_JSON_NULL = 0
+R_JSON_OBJECT = 1
+R_JSON_ARRAY = 2
+R_JSON_STRING = 3
+R_JSON_INTEGER = 4
+R_JSON_DOUBLE = 5
+R_JSON_BOOLEAN = 6
+r_json_type_t = ctypes.c_uint32 # enum
+RJsonType = r_json_type_t
+RJsonType__enumvalues = r_json_type_t__enumvalues
+class struct_r_json_t(Structure):
+    pass
+
+class union_r_json_t_0(Union):
+    pass
+
+class struct_r_json_t_0_0(Structure):
+    pass
+
+class union_r_json_t_0_0_0(Union):
+    pass
+
+union_r_json_t_0_0_0._pack_ = 1 # source:False
+union_r_json_t_0_0_0._fields_ = [
+    ('u_value', ctypes.c_uint64),
+    ('s_value', ctypes.c_int64),
+]
+
+struct_r_json_t_0_0._pack_ = 1 # source:False
+struct_r_json_t_0_0._fields_ = [
+    ('r_json_t_0_0_0', union_r_json_t_0_0_0),
+    ('dbl_value', ctypes.c_double),
+]
+
+class struct_r_json_t_0_1(Structure):
+    pass
+
+struct_r_json_t_0_1._pack_ = 1 # source:False
+struct_r_json_t_0_1._fields_ = [
+    ('count', ctypes.c_uint64),
+    ('first', ctypes.POINTER(struct_r_json_t)),
+    ('last', ctypes.POINTER(struct_r_json_t)),
+]
+
+union_r_json_t_0._pack_ = 1 # source:False
+union_r_json_t_0._fields_ = [
+    ('str_value', ctypes.POINTER(ctypes.c_char)),
+    ('num', struct_r_json_t_0_0),
+    ('children', struct_r_json_t_0_1),
+]
+
+struct_r_json_t._pack_ = 1 # source:False
+struct_r_json_t._fields_ = [
+    ('type', RJsonType),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+    ('key', ctypes.POINTER(ctypes.c_char)),
+    ('r_json_t_0', union_r_json_t_0),
+    ('next', ctypes.POINTER(struct_r_json_t)),
+]
+
+RJson = struct_r_json_t
+r_json_parse = _libr_util.r_json_parse
+r_json_parse.restype = ctypes.POINTER(struct_r_json_t)
+r_json_parse.argtypes = [ctypes.POINTER(ctypes.c_char)]
+r_json_free = _libr_util.r_json_free
+r_json_free.restype = None
+r_json_free.argtypes = [ctypes.POINTER(struct_r_json_t)]
+r_json_get = _libr_util.r_json_get
+r_json_get.restype = ctypes.POINTER(struct_r_json_t)
+r_json_get.argtypes = [ctypes.POINTER(struct_r_json_t), ctypes.POINTER(ctypes.c_char)]
+r_json_item = _libr_util.r_json_item
+r_json_item.restype = ctypes.POINTER(struct_r_json_t)
+r_json_item.argtypes = [ctypes.POINTER(struct_r_json_t), size_t]
 class struct_c__SA_RBraile(Structure):
     pass
 
@@ -3560,19 +3695,50 @@ class struct_r_print_t(Structure):
 class struct_r_reg_t(Structure):
     pass
 
-class struct_r_charset_t(Structure):
-    pass
-
 class struct_r_num_t(Structure):
     pass
 
 class struct_r_cons_t(Structure):
     pass
 
+class struct_r_charset_t(Structure):
+    pass
+
+class struct_r_reg_item_t(Structure):
+    pass
+
+class struct_r_core_bind_t(Structure):
+    pass
+
+struct_r_core_bind_t._pack_ = 1 # source:False
+struct_r_core_bind_t._fields_ = [
+    ('core', ctypes.POINTER(None)),
+    ('cmd', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
+    ('cmdf', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
+    ('cmdstr', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
+    ('cmdstrf', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
+    ('puts', ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_char))),
+    ('bphit', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(None))),
+    ('syshit', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
+    ('setab', ctypes.CFUNCTYPE(None, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char), ctypes.c_int32)),
+    ('getName', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.c_uint64)),
+    ('getNameDelta', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.c_uint64)),
+    ('archbits', ctypes.CFUNCTYPE(None, ctypes.POINTER(None), ctypes.c_uint64)),
+    ('cfggeti', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
+    ('cfgGet', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
+    ('numGet', ctypes.CFUNCTYPE(ctypes.c_uint64, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
+    ('isMapped', ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.POINTER(None), ctypes.c_uint64, ctypes.c_int32)),
+    ('syncDebugMaps', ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.POINTER(None))),
+    ('pjWithEncoding', ctypes.CFUNCTYPE(ctypes.POINTER(None), ctypes.POINTER(None))),
+]
+
 class struct_r_io_bind_t(Structure):
     pass
 
 class struct_r_io_t(Structure):
+    pass
+
+class struct_r_io_desc_t(Structure):
     pass
 
 
@@ -3660,9 +3826,6 @@ PTRACE_SECCOMP_GET_FILTER = 16908
 PTRACE_SECCOMP_GET_METADATA = 16909
 PTRACE_GET_SYSCALL_INFO = 16910
 __ptrace_request = ctypes.c_uint32 # enum
-class struct_r_io_desc_t(Structure):
-    pass
-
 class struct_r_io_map_t(Structure):
     pass
 
@@ -3703,34 +3866,6 @@ struct_r_io_bind_t._fields_ = [
     ('ptrace', ctypes.CFUNCTYPE(ctypes.c_int64, ctypes.POINTER(struct_r_io_t), __ptrace_request, ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(None))),
     ('ptrace_func', ctypes.CFUNCTYPE(ctypes.POINTER(None), ctypes.POINTER(struct_r_io_t), ctypes.CFUNCTYPE(ctypes.POINTER(None), ctypes.POINTER(None)), ctypes.POINTER(None))),
 ]
-
-class struct_r_core_bind_t(Structure):
-    pass
-
-struct_r_core_bind_t._pack_ = 1 # source:False
-struct_r_core_bind_t._fields_ = [
-    ('core', ctypes.POINTER(None)),
-    ('cmd', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
-    ('cmdf', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
-    ('cmdstr', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
-    ('cmdstrf', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
-    ('puts', ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_char))),
-    ('bphit', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(None))),
-    ('syshit', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
-    ('setab', ctypes.CFUNCTYPE(None, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char), ctypes.c_int32)),
-    ('getName', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.c_uint64)),
-    ('getNameDelta', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.c_uint64)),
-    ('archbits', ctypes.CFUNCTYPE(None, ctypes.POINTER(None), ctypes.c_uint64)),
-    ('cfggeti', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
-    ('cfgGet', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
-    ('numGet', ctypes.CFUNCTYPE(ctypes.c_uint64, ctypes.POINTER(None), ctypes.POINTER(ctypes.c_char))),
-    ('isMapped', ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.POINTER(None), ctypes.c_uint64, ctypes.c_int32)),
-    ('syncDebugMaps', ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.POINTER(None))),
-    ('pjWithEncoding', ctypes.CFUNCTYPE(ctypes.POINTER(None), ctypes.POINTER(None))),
-]
-
-class struct_r_reg_item_t(Structure):
-    pass
 
 class struct_r_cons_bind_t(Structure):
     pass
@@ -3826,6 +3961,12 @@ struct_r_print_t._fields_ = [
 class struct_ptrace_wrap_instance_t(Structure):
     pass
 
+class struct_r_skyline_t(Structure):
+    _pack_ = 1 # source:False
+    _fields_ = [
+    ('v', struct_r_vector_t),
+     ]
+
 class struct_r_io_undo_t(Structure):
     pass
 
@@ -3850,12 +3991,6 @@ struct_r_io_undo_t._fields_ = [
     ('redos', ctypes.c_int32),
     ('seek', struct_r_io_undos_t * 64),
 ]
-
-class struct_r_skyline_t(Structure):
-    _pack_ = 1 # source:False
-    _fields_ = [
-    ('v', struct_r_vector_t),
-     ]
 
 struct_r_io_t._pack_ = 1 # source:False
 struct_r_io_t._fields_ = [
@@ -3956,13 +4091,13 @@ struct_r_io_map_t._fields_ = [
     ('name', ctypes.POINTER(ctypes.c_char)),
 ]
 
+class struct_r_cons_context_t(Structure):
+    pass
+
 class struct__IO_FILE(Structure):
     pass
 
 class struct_r_line_t(Structure):
-    pass
-
-class struct_r_cons_context_t(Structure):
     pass
 
 class struct_termios(Structure):
@@ -4073,6 +4208,99 @@ struct_r_cons_t._fields_ = [
 
 class struct_r_stack_t(Structure):
     pass
+
+class struct_r_cons_palette_t(Structure):
+    pass
+
+class struct_rcolor_t(Structure):
+    pass
+
+struct_rcolor_t._pack_ = 1 # source:False
+struct_rcolor_t._fields_ = [
+    ('attr', ctypes.c_ubyte),
+    ('a', ctypes.c_ubyte),
+    ('r', ctypes.c_ubyte),
+    ('g', ctypes.c_ubyte),
+    ('b', ctypes.c_ubyte),
+    ('r2', ctypes.c_ubyte),
+    ('g2', ctypes.c_ubyte),
+    ('b2', ctypes.c_ubyte),
+    ('id16', ctypes.c_byte),
+]
+
+struct_r_cons_palette_t._pack_ = 1 # source:False
+struct_r_cons_palette_t._fields_ = [
+    ('b0x00', struct_rcolor_t),
+    ('b0x7f', struct_rcolor_t),
+    ('b0xff', struct_rcolor_t),
+    ('args', struct_rcolor_t),
+    ('bin', struct_rcolor_t),
+    ('btext', struct_rcolor_t),
+    ('call', struct_rcolor_t),
+    ('cjmp', struct_rcolor_t),
+    ('cmp', struct_rcolor_t),
+    ('comment', struct_rcolor_t),
+    ('usercomment', struct_rcolor_t),
+    ('creg', struct_rcolor_t),
+    ('flag', struct_rcolor_t),
+    ('fline', struct_rcolor_t),
+    ('floc', struct_rcolor_t),
+    ('flow', struct_rcolor_t),
+    ('flow2', struct_rcolor_t),
+    ('fname', struct_rcolor_t),
+    ('help', struct_rcolor_t),
+    ('input', struct_rcolor_t),
+    ('invalid', struct_rcolor_t),
+    ('jmp', struct_rcolor_t),
+    ('label', struct_rcolor_t),
+    ('math', struct_rcolor_t),
+    ('mov', struct_rcolor_t),
+    ('nop', struct_rcolor_t),
+    ('num', struct_rcolor_t),
+    ('offset', struct_rcolor_t),
+    ('other', struct_rcolor_t),
+    ('pop', struct_rcolor_t),
+    ('prompt', struct_rcolor_t),
+    ('push', struct_rcolor_t),
+    ('crypto', struct_rcolor_t),
+    ('reg', struct_rcolor_t),
+    ('reset', struct_rcolor_t),
+    ('ret', struct_rcolor_t),
+    ('swi', struct_rcolor_t),
+    ('trap', struct_rcolor_t),
+    ('ucall', struct_rcolor_t),
+    ('ujmp', struct_rcolor_t),
+    ('ai_read', struct_rcolor_t),
+    ('ai_write', struct_rcolor_t),
+    ('ai_exec', struct_rcolor_t),
+    ('ai_seq', struct_rcolor_t),
+    ('ai_ascii', struct_rcolor_t),
+    ('gui_cflow', struct_rcolor_t),
+    ('gui_dataoffset', struct_rcolor_t),
+    ('gui_background', struct_rcolor_t),
+    ('gui_alt_background', struct_rcolor_t),
+    ('gui_border', struct_rcolor_t),
+    ('wordhl', struct_rcolor_t),
+    ('linehl', struct_rcolor_t),
+    ('func_var', struct_rcolor_t),
+    ('func_var_type', struct_rcolor_t),
+    ('func_var_addr', struct_rcolor_t),
+    ('widget_bg', struct_rcolor_t),
+    ('widget_sel', struct_rcolor_t),
+    ('graph_box', struct_rcolor_t),
+    ('graph_box2', struct_rcolor_t),
+    ('graph_box3', struct_rcolor_t),
+    ('graph_box4', struct_rcolor_t),
+    ('graph_true', struct_rcolor_t),
+    ('graph_false', struct_rcolor_t),
+    ('graph_trufae', struct_rcolor_t),
+    ('graph_traced', struct_rcolor_t),
+    ('graph_current', struct_rcolor_t),
+    ('graph_diff_match', struct_rcolor_t),
+    ('graph_diff_unmatch', struct_rcolor_t),
+    ('graph_diff_unknown', struct_rcolor_t),
+    ('graph_diff_new', struct_rcolor_t),
+]
 
 class struct_r_cons_printable_palette_t(Structure):
     pass
@@ -4215,99 +4443,6 @@ R_LOGLVL_ERROR = 5
 R_LOGLVL_FATAL = 6
 R_LOGLVL_NONE = 255
 r_log_level = ctypes.c_uint32 # enum
-class struct_r_cons_palette_t(Structure):
-    pass
-
-class struct_rcolor_t(Structure):
-    pass
-
-struct_rcolor_t._pack_ = 1 # source:False
-struct_rcolor_t._fields_ = [
-    ('attr', ctypes.c_ubyte),
-    ('a', ctypes.c_ubyte),
-    ('r', ctypes.c_ubyte),
-    ('g', ctypes.c_ubyte),
-    ('b', ctypes.c_ubyte),
-    ('r2', ctypes.c_ubyte),
-    ('g2', ctypes.c_ubyte),
-    ('b2', ctypes.c_ubyte),
-    ('id16', ctypes.c_byte),
-]
-
-struct_r_cons_palette_t._pack_ = 1 # source:False
-struct_r_cons_palette_t._fields_ = [
-    ('b0x00', struct_rcolor_t),
-    ('b0x7f', struct_rcolor_t),
-    ('b0xff', struct_rcolor_t),
-    ('args', struct_rcolor_t),
-    ('bin', struct_rcolor_t),
-    ('btext', struct_rcolor_t),
-    ('call', struct_rcolor_t),
-    ('cjmp', struct_rcolor_t),
-    ('cmp', struct_rcolor_t),
-    ('comment', struct_rcolor_t),
-    ('usercomment', struct_rcolor_t),
-    ('creg', struct_rcolor_t),
-    ('flag', struct_rcolor_t),
-    ('fline', struct_rcolor_t),
-    ('floc', struct_rcolor_t),
-    ('flow', struct_rcolor_t),
-    ('flow2', struct_rcolor_t),
-    ('fname', struct_rcolor_t),
-    ('help', struct_rcolor_t),
-    ('input', struct_rcolor_t),
-    ('invalid', struct_rcolor_t),
-    ('jmp', struct_rcolor_t),
-    ('label', struct_rcolor_t),
-    ('math', struct_rcolor_t),
-    ('mov', struct_rcolor_t),
-    ('nop', struct_rcolor_t),
-    ('num', struct_rcolor_t),
-    ('offset', struct_rcolor_t),
-    ('other', struct_rcolor_t),
-    ('pop', struct_rcolor_t),
-    ('prompt', struct_rcolor_t),
-    ('push', struct_rcolor_t),
-    ('crypto', struct_rcolor_t),
-    ('reg', struct_rcolor_t),
-    ('reset', struct_rcolor_t),
-    ('ret', struct_rcolor_t),
-    ('swi', struct_rcolor_t),
-    ('trap', struct_rcolor_t),
-    ('ucall', struct_rcolor_t),
-    ('ujmp', struct_rcolor_t),
-    ('ai_read', struct_rcolor_t),
-    ('ai_write', struct_rcolor_t),
-    ('ai_exec', struct_rcolor_t),
-    ('ai_seq', struct_rcolor_t),
-    ('ai_ascii', struct_rcolor_t),
-    ('gui_cflow', struct_rcolor_t),
-    ('gui_dataoffset', struct_rcolor_t),
-    ('gui_background', struct_rcolor_t),
-    ('gui_alt_background', struct_rcolor_t),
-    ('gui_border', struct_rcolor_t),
-    ('wordhl', struct_rcolor_t),
-    ('linehl', struct_rcolor_t),
-    ('func_var', struct_rcolor_t),
-    ('func_var_type', struct_rcolor_t),
-    ('func_var_addr', struct_rcolor_t),
-    ('widget_bg', struct_rcolor_t),
-    ('widget_sel', struct_rcolor_t),
-    ('graph_box', struct_rcolor_t),
-    ('graph_box2', struct_rcolor_t),
-    ('graph_box3', struct_rcolor_t),
-    ('graph_box4', struct_rcolor_t),
-    ('graph_true', struct_rcolor_t),
-    ('graph_false', struct_rcolor_t),
-    ('graph_trufae', struct_rcolor_t),
-    ('graph_traced', struct_rcolor_t),
-    ('graph_current', struct_rcolor_t),
-    ('graph_diff_match', struct_rcolor_t),
-    ('graph_diff_unmatch', struct_rcolor_t),
-    ('graph_diff_unknown', struct_rcolor_t),
-    ('graph_diff_new', struct_rcolor_t),
-]
-
 struct_r_cons_context_t._pack_ = 1 # source:False
 struct_r_cons_context_t._fields_ = [
     ('grep', struct_r_cons_grep_t),
@@ -4345,13 +4480,13 @@ struct_r_stack_t._fields_ = [
     ('free', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
 ]
 
+class struct__IO_codecvt(Structure):
+    pass
+
 class struct__IO_marker(Structure):
     pass
 
 class struct__IO_wide_data(Structure):
-    pass
-
-class struct__IO_codecvt(Structure):
     pass
 
 struct__IO_FILE._pack_ = 1 # source:False
@@ -4486,12 +4621,6 @@ class struct_r_hud_t(Structure):
 class struct_r_selection_widget_t(Structure):
     pass
 
-class struct_r_line_comp_t(Structure):
-    pass
-
-class struct_r_line_buffer_t(Structure):
-    pass
-
 
 # values for enumeration 'c__EA_RLinePromptType'
 c__EA_RLinePromptType__enumvalues = {
@@ -4503,6 +4632,12 @@ R_LINE_PROMPT_DEFAULT = 0
 R_LINE_PROMPT_OFFSET = 1
 R_LINE_PROMPT_FILE = 2
 c__EA_RLinePromptType = ctypes.c_uint32 # enum
+class struct_r_line_comp_t(Structure):
+    pass
+
+class struct_r_line_buffer_t(Structure):
+    pass
+
 struct_r_line_comp_t._pack_ = 1 # source:False
 struct_r_line_comp_t._fields_ = [
     ('opt', ctypes.c_bool),
@@ -4893,142 +5028,6 @@ r_print_json_human.argtypes = [ctypes.POINTER(ctypes.c_char)]
 r_print_json_path = _libr_util.r_print_json_path
 r_print_json_path.restype = ctypes.POINTER(ctypes.c_char)
 r_print_json_path.argtypes = [ctypes.POINTER(ctypes.c_char), ctypes.c_int32]
-
-# values for enumeration 'r_json_type_t'
-r_json_type_t__enumvalues = {
-    0: 'R_JSON_NULL',
-    1: 'R_JSON_OBJECT',
-    2: 'R_JSON_ARRAY',
-    3: 'R_JSON_STRING',
-    4: 'R_JSON_INTEGER',
-    5: 'R_JSON_DOUBLE',
-    6: 'R_JSON_BOOLEAN',
-}
-R_JSON_NULL = 0
-R_JSON_OBJECT = 1
-R_JSON_ARRAY = 2
-R_JSON_STRING = 3
-R_JSON_INTEGER = 4
-R_JSON_DOUBLE = 5
-R_JSON_BOOLEAN = 6
-r_json_type_t = ctypes.c_uint32 # enum
-RJsonType = r_json_type_t
-RJsonType__enumvalues = r_json_type_t__enumvalues
-class struct_r_json_t(Structure):
-    pass
-
-class union_r_json_t_0(Union):
-    pass
-
-class struct_r_json_t_0_0(Structure):
-    pass
-
-class union_r_json_t_0_0_0(Union):
-    pass
-
-union_r_json_t_0_0_0._pack_ = 1 # source:False
-union_r_json_t_0_0_0._fields_ = [
-    ('u_value', ctypes.c_uint64),
-    ('s_value', ctypes.c_int64),
-]
-
-struct_r_json_t_0_0._pack_ = 1 # source:False
-struct_r_json_t_0_0._fields_ = [
-    ('r_json_t_0_0_0', union_r_json_t_0_0_0),
-    ('dbl_value', ctypes.c_double),
-]
-
-class struct_r_json_t_0_1(Structure):
-    pass
-
-struct_r_json_t_0_1._pack_ = 1 # source:False
-struct_r_json_t_0_1._fields_ = [
-    ('count', ctypes.c_uint64),
-    ('first', ctypes.POINTER(struct_r_json_t)),
-    ('last', ctypes.POINTER(struct_r_json_t)),
-]
-
-union_r_json_t_0._pack_ = 1 # source:False
-union_r_json_t_0._fields_ = [
-    ('str_value', ctypes.POINTER(ctypes.c_char)),
-    ('num', struct_r_json_t_0_0),
-    ('children', struct_r_json_t_0_1),
-]
-
-struct_r_json_t._pack_ = 1 # source:False
-struct_r_json_t._fields_ = [
-    ('type', RJsonType),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-    ('key', ctypes.POINTER(ctypes.c_char)),
-    ('r_json_t_0', union_r_json_t_0),
-    ('next', ctypes.POINTER(struct_r_json_t)),
-]
-
-RJson = struct_r_json_t
-r_json_parse = _libr_util.r_json_parse
-r_json_parse.restype = ctypes.POINTER(struct_r_json_t)
-r_json_parse.argtypes = [ctypes.POINTER(ctypes.c_char)]
-r_json_free = _libr_util.r_json_free
-r_json_free.restype = None
-r_json_free.argtypes = [ctypes.POINTER(struct_r_json_t)]
-r_json_get = _libr_util.r_json_get
-r_json_get.restype = ctypes.POINTER(struct_r_json_t)
-r_json_get.argtypes = [ctypes.POINTER(struct_r_json_t), ctypes.POINTER(ctypes.c_char)]
-r_json_item = _libr_util.r_json_item
-r_json_item.restype = ctypes.POINTER(struct_r_json_t)
-r_json_item.argtypes = [ctypes.POINTER(struct_r_json_t), size_t]
-class struct_r_anal_graph_node_info_t(Structure):
-    pass
-
-struct_r_anal_graph_node_info_t._pack_ = 1 # source:False
-struct_r_anal_graph_node_info_t._fields_ = [
-    ('title', ctypes.POINTER(ctypes.c_char)),
-    ('body', ctypes.POINTER(ctypes.c_char)),
-    ('offset', ctypes.c_uint64),
-]
-
-RGraphNodeInfo = struct_r_anal_graph_node_info_t
-r_graph_free_node_info = _libr_util.r_graph_free_node_info
-r_graph_free_node_info.restype = None
-r_graph_free_node_info.argtypes = [ctypes.POINTER(None)]
-r_graph_create_node_info = _libr_util.r_graph_create_node_info
-r_graph_create_node_info.restype = ctypes.POINTER(struct_r_anal_graph_node_info_t)
-r_graph_create_node_info.argtypes = [ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char), ctypes.c_uint64]
-class struct_r_graph_node_t(Structure):
-    pass
-
-struct_r_graph_node_t._pack_ = 1 # source:False
-struct_r_graph_node_t._fields_ = [
-    ('idx', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-    ('data', ctypes.POINTER(None)),
-    ('out_nodes', ctypes.POINTER(struct_r_list_t)),
-    ('in_nodes', ctypes.POINTER(struct_r_list_t)),
-    ('all_neighbours', ctypes.POINTER(struct_r_list_t)),
-    ('free', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
-]
-
-class struct_r_graph_t(Structure):
-    pass
-
-struct_r_graph_t._pack_ = 1 # source:False
-struct_r_graph_t._fields_ = [
-    ('n_nodes', ctypes.c_uint32),
-    ('n_edges', ctypes.c_uint32),
-    ('last_index', ctypes.c_int32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-    ('nodes', ctypes.POINTER(struct_r_list_t)),
-]
-
-r_graph_add_node_info = _libr_util.r_graph_add_node_info
-r_graph_add_node_info.restype = ctypes.POINTER(struct_r_graph_node_t)
-r_graph_add_node_info.argtypes = [ctypes.POINTER(struct_r_graph_t), ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char), ctypes.c_uint64]
-r_graph_drawable_to_dot = _libr_util.r_graph_drawable_to_dot
-r_graph_drawable_to_dot.restype = ctypes.POINTER(ctypes.c_char)
-r_graph_drawable_to_dot.argtypes = [ctypes.POINTER(struct_r_graph_t), ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char)]
-r_graph_drawable_to_json = _libr_util.r_graph_drawable_to_json
-r_graph_drawable_to_json.restype = None
-r_graph_drawable_to_json.argtypes = [ctypes.POINTER(struct_r_graph_t), ctypes.POINTER(struct_pj_t), ctypes.c_bool]
 r_util_version = _libr_util.r_util_version
 r_util_version.restype = ctypes.POINTER(ctypes.c_char)
 r_util_version.argtypes = []
