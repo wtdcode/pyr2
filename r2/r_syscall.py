@@ -262,10 +262,10 @@ struct__IO_FILE._fields_ = [
     ('_unused2', ctypes.c_char * 20),
 ]
 
-class struct_ht_pp_t(Structure):
+class struct_ls_t(Structure):
     pass
 
-class struct_ls_t(Structure):
+class struct_ht_pp_t(Structure):
     pass
 
 class struct_cdb(Structure):

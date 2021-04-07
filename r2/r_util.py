@@ -1164,19 +1164,70 @@ RTypeKind = ctypes.c_uint32 # enum
 class struct_sdb_t(Structure):
     pass
 
+class struct_ls_t(Structure):
+    pass
+
 class struct_ht_pp_t(Structure):
     pass
 
-class struct_ls_t(Structure):
+class struct_sdb_kv(Structure):
     pass
+
+class struct_ht_pp_kv(Structure):
+    pass
+
+struct_ht_pp_kv._pack_ = 1 # source:False
+struct_ht_pp_kv._fields_ = [
+    ('key', ctypes.POINTER(None)),
+    ('value', ctypes.POINTER(None)),
+    ('key_len', ctypes.c_uint32),
+    ('value_len', ctypes.c_uint32),
+]
+
+struct_sdb_kv._pack_ = 1 # source:False
+struct_sdb_kv._fields_ = [
+    ('base', struct_ht_pp_kv),
+    ('cas', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+    ('expire', ctypes.c_uint64),
+]
+
+class struct_c__SA_dict(Structure):
+    pass
+
+struct_c__SA_dict._pack_ = 1 # source:False
+struct_c__SA_dict._fields_ = [
+    ('table', ctypes.POINTER(ctypes.POINTER(None))),
+    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
+    ('size', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+]
+
+class struct_cdb(Structure):
+    pass
+
+struct_cdb._pack_ = 1 # source:False
+struct_cdb._fields_ = [
+    ('map', ctypes.POINTER(ctypes.c_char)),
+    ('fd', ctypes.c_int32),
+    ('size', ctypes.c_uint32),
+    ('loop', ctypes.c_uint32),
+    ('khash', ctypes.c_uint32),
+    ('kpos', ctypes.c_uint32),
+    ('hpos', ctypes.c_uint32),
+    ('hslots', ctypes.c_uint32),
+    ('dpos', ctypes.c_uint32),
+    ('dlen', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+]
 
 class struct_cdb_make(Structure):
     pass
 
-class struct_cdb_hp(Structure):
+class struct_cdb_hplist(Structure):
     pass
 
-class struct_cdb_hplist(Structure):
+class struct_cdb_hp(Structure):
     pass
 
 class struct_buffer(Structure):
@@ -1206,57 +1257,6 @@ struct_cdb_make._fields_ = [
     ('b', struct_buffer),
     ('pos', ctypes.c_uint32),
     ('fd', ctypes.c_int32),
-]
-
-class struct_c__SA_dict(Structure):
-    pass
-
-struct_c__SA_dict._pack_ = 1 # source:False
-struct_c__SA_dict._fields_ = [
-    ('table', ctypes.POINTER(ctypes.POINTER(None))),
-    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
-    ('size', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-]
-
-class struct_sdb_kv(Structure):
-    pass
-
-class struct_ht_pp_kv(Structure):
-    pass
-
-struct_ht_pp_kv._pack_ = 1 # source:False
-struct_ht_pp_kv._fields_ = [
-    ('key', ctypes.POINTER(None)),
-    ('value', ctypes.POINTER(None)),
-    ('key_len', ctypes.c_uint32),
-    ('value_len', ctypes.c_uint32),
-]
-
-struct_sdb_kv._pack_ = 1 # source:False
-struct_sdb_kv._fields_ = [
-    ('base', struct_ht_pp_kv),
-    ('cas', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-    ('expire', ctypes.c_uint64),
-]
-
-class struct_cdb(Structure):
-    pass
-
-struct_cdb._pack_ = 1 # source:False
-struct_cdb._fields_ = [
-    ('map', ctypes.POINTER(ctypes.c_char)),
-    ('fd', ctypes.c_int32),
-    ('size', ctypes.c_uint32),
-    ('loop', ctypes.c_uint32),
-    ('khash', ctypes.c_uint32),
-    ('kpos', ctypes.c_uint32),
-    ('hpos', ctypes.c_uint32),
-    ('hslots', ctypes.c_uint32),
-    ('dpos', ctypes.c_uint32),
-    ('dlen', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
 ]
 
 struct_sdb_t._pack_ = 1 # source:False
@@ -1828,6 +1828,14 @@ class struct_r_space_event_t(Structure):
 class union_r_space_event_t_0(Union):
     pass
 
+class struct_r_space_event_t_0_0(Structure):
+    pass
+
+struct_r_space_event_t_0_0._pack_ = 1 # source:False
+struct_r_space_event_t_0_0._fields_ = [
+    ('space', ctypes.POINTER(struct_r_space_t)),
+]
+
 class struct_r_space_event_t_0_2(Structure):
     pass
 
@@ -1843,14 +1851,6 @@ class struct_r_space_event_t_0_1(Structure):
 
 struct_r_space_event_t_0_1._pack_ = 1 # source:False
 struct_r_space_event_t_0_1._fields_ = [
-    ('space', ctypes.POINTER(struct_r_space_t)),
-]
-
-class struct_r_space_event_t_0_0(Structure):
-    pass
-
-struct_r_space_event_t_0_0._pack_ = 1 # source:False
-struct_r_space_event_t_0_0._fields_ = [
     ('space', ctypes.POINTER(struct_r_space_t)),
 ]
 
@@ -2563,17 +2563,6 @@ class struct_pj_t(Structure):
     pass
 
 
-# values for enumeration 'PJEncodingNum'
-PJEncodingNum__enumvalues = {
-    0: 'PJ_ENCODING_NUM_DEFAULT',
-    1: 'PJ_ENCODING_NUM_STR',
-    2: 'PJ_ENCODING_NUM_HEX',
-}
-PJ_ENCODING_NUM_DEFAULT = 0
-PJ_ENCODING_NUM_STR = 1
-PJ_ENCODING_NUM_HEX = 2
-PJEncodingNum = ctypes.c_uint32 # enum
-
 # values for enumeration 'PJEncodingStr'
 PJEncodingStr__enumvalues = {
     0: 'PJ_ENCODING_STR_DEFAULT',
@@ -2588,6 +2577,17 @@ PJ_ENCODING_STR_HEX = 2
 PJ_ENCODING_STR_ARRAY = 3
 PJ_ENCODING_STR_STRIP = 4
 PJEncodingStr = ctypes.c_uint32 # enum
+
+# values for enumeration 'PJEncodingNum'
+PJEncodingNum__enumvalues = {
+    0: 'PJ_ENCODING_NUM_DEFAULT',
+    1: 'PJ_ENCODING_NUM_STR',
+    2: 'PJ_ENCODING_NUM_HEX',
+}
+PJ_ENCODING_NUM_DEFAULT = 0
+PJ_ENCODING_NUM_STR = 1
+PJ_ENCODING_NUM_HEX = 2
+PJEncodingNum = ctypes.c_uint32 # enum
 struct_pj_t._pack_ = 1 # source:False
 struct_pj_t._fields_ = [
     ('sb', struct_c__SA_RStrBuf),

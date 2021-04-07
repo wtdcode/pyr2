@@ -184,10 +184,10 @@ class struct_r_io_bind_t(Structure):
 class struct_r_io_t(Structure):
     pass
 
-class struct_r_list_t(Structure):
+class struct_r_io_map_t(Structure):
     pass
 
-class struct_r_io_map_t(Structure):
+class struct_r_io_desc_t(Structure):
     pass
 
 
@@ -275,7 +275,7 @@ PTRACE_SECCOMP_GET_FILTER = 16908
 PTRACE_SECCOMP_GET_METADATA = 16909
 PTRACE_GET_SYSCALL_INFO = 16910
 __ptrace_request = ctypes.c_uint32 # enum
-class struct_r_io_desc_t(Structure):
+class struct_r_list_t(Structure):
     pass
 
 struct_r_io_bind_t._pack_ = 1 # source:False
@@ -319,6 +319,12 @@ struct_r_io_bind_t._fields_ = [
 class struct_r_event_t(Structure):
     pass
 
+class struct_r_id_pool_t(Structure):
+    pass
+
+class struct_r_id_storage_t(Structure):
+    pass
+
 class struct_r_cache_t(Structure):
     pass
 
@@ -326,12 +332,6 @@ class struct_ls_t(Structure):
     pass
 
 class struct_ptrace_wrap_instance_t(Structure):
-    pass
-
-class struct_r_id_storage_t(Structure):
-    pass
-
-class struct_r_id_pool_t(Structure):
     pass
 
 class struct_r_core_bind_t(Structure):
@@ -384,7 +384,7 @@ struct_r_io_undo_t._fields_ = [
     ('seek', struct_r_io_undos_t * 64),
 ]
 
-class struct_r_skyline_t(Structure):
+class struct_r_pvector_t(Structure):
     pass
 
 class struct_r_vector_t(Structure):
@@ -400,12 +400,12 @@ struct_r_vector_t._fields_ = [
     ('free_user', ctypes.POINTER(None)),
 ]
 
-struct_r_skyline_t._pack_ = 1 # source:False
-struct_r_skyline_t._fields_ = [
+struct_r_pvector_t._pack_ = 1 # source:False
+struct_r_pvector_t._fields_ = [
     ('v', struct_r_vector_t),
 ]
 
-class struct_r_pvector_t(Structure):
+class struct_r_skyline_t(Structure):
     _pack_ = 1 # source:False
     _fields_ = [
     ('v', struct_r_vector_t),

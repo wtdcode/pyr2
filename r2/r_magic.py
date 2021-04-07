@@ -253,17 +253,6 @@ struct_out._fields_ = [
     ('pbuf', ctypes.POINTER(ctypes.c_char)),
 ]
 
-class struct_r_magic_set_2(Structure):
-    pass
-
-struct_r_magic_set_2._pack_ = 1 # source:False
-struct_r_magic_set_2._fields_ = [
-    ('s', ctypes.POINTER(ctypes.c_char)),
-    ('s_len', ctypes.c_uint64),
-    ('offset', ctypes.c_uint64),
-    ('rm_len', ctypes.c_uint64),
-]
-
 class struct_cont(Structure):
     pass
 
@@ -274,6 +263,17 @@ struct_cont._pack_ = 1 # source:False
 struct_cont._fields_ = [
     ('len', ctypes.c_uint64),
     ('li', ctypes.POINTER(struct_level_info)),
+]
+
+class struct_r_magic_set_2(Structure):
+    pass
+
+struct_r_magic_set_2._pack_ = 1 # source:False
+struct_r_magic_set_2._fields_ = [
+    ('s', ctypes.POINTER(ctypes.c_char)),
+    ('s_len', ctypes.c_uint64),
+    ('offset', ctypes.c_uint64),
+    ('rm_len', ctypes.c_uint64),
 ]
 
 struct_r_magic_set._pack_ = 1 # source:False

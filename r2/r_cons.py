@@ -594,10 +594,10 @@ RConsColorMode__enumvalues = c__EA_RConsColorMode__enumvalues
 class struct_r_cons_context_t(Structure):
     pass
 
-class struct_c__SA_RStrBuf(Structure):
+class struct_r_stack_t(Structure):
     pass
 
-class struct_r_stack_t(Structure):
+class struct_c__SA_RStrBuf(Structure):
     pass
 
 
@@ -788,13 +788,13 @@ struct_r_cons_t._fields_ = [
     ('cpos', RConsCursorPos),
 ]
 
+class struct__IO_marker(Structure):
+    pass
+
 class struct__IO_wide_data(Structure):
     pass
 
 class struct__IO_codecvt(Structure):
-    pass
-
-class struct__IO_marker(Structure):
     pass
 
 struct__IO_FILE._pack_ = 1 # source:False
@@ -834,6 +834,15 @@ struct__IO_FILE._fields_ = [
 
 class struct_r_num_calc_t(Structure):
     pass
+
+class struct_c__SA_RNumCalcValue(Structure):
+    pass
+
+struct_c__SA_RNumCalcValue._pack_ = 1 # source:False
+struct_c__SA_RNumCalcValue._fields_ = [
+    ('d', ctypes.c_double),
+    ('n', ctypes.c_uint64),
+]
 
 
 # values for enumeration 'c__EA_RNumCalcToken'
@@ -884,15 +893,6 @@ RNCSHR = 62
 RNCROL = 35
 RNCROR = 36
 c__EA_RNumCalcToken = ctypes.c_uint32 # enum
-class struct_c__SA_RNumCalcValue(Structure):
-    pass
-
-struct_c__SA_RNumCalcValue._pack_ = 1 # source:False
-struct_c__SA_RNumCalcValue._fields_ = [
-    ('d', ctypes.c_double),
-    ('n', ctypes.c_uint64),
-]
-
 struct_r_num_calc_t._pack_ = 1 # source:False
 struct_r_num_calc_t._fields_ = [
     ('curr_tok', c__EA_RNumCalcToken),
@@ -2022,10 +2022,10 @@ struct_c__SA_dict._fields_ = [
 class struct_cdb_make(Structure):
     pass
 
-class struct_cdb_hplist(Structure):
+class struct_cdb_hp(Structure):
     pass
 
-class struct_cdb_hp(Structure):
+class struct_cdb_hplist(Structure):
     pass
 
 class struct_buffer(Structure):
