@@ -5,29 +5,29 @@
 # LONGDOUBLE_SIZE is: 16
 #
 import ctypes
-from .r2libs import r_anal as _libr_anal
-from .r2libs import r_asm as _libr_asm
-from .r2libs import r_bin as _libr_bin
-from .r2libs import r_bp as _libr_bp
-from .r2libs import r_config as _libr_config
-from .r2libs import r_cons as _libr_cons
-from .r2libs import r_core as _libr_core
-from .r2libs import r_crypto as _libr_crypto
-from .r2libs import r_debug as _libr_debug
-from .r2libs import r_egg as _libr_egg
-from .r2libs import r_flag as _libr_flag
-from .r2libs import r_fs as _libr_fs
-from .r2libs import r_hash as _libr_hash
-from .r2libs import r_io as _libr_io
-from .r2libs import r_lang as _libr_lang
-from .r2libs import r_magic as _libr_magic
-from .r2libs import r_main as _libr_main
-from .r2libs import r_parse as _libr_parse
-from .r2libs import r_reg as _libr_reg
-from .r2libs import r_search as _libr_search
-from .r2libs import r_socket as _libr_socket
-from .r2libs import r_syscall as _libr_syscall
-from .r2libs import r_util as _libr_util
+from .r_libs import r_anal as _libr_anal
+from .r_libs import r_asm as _libr_asm
+from .r_libs import r_bin as _libr_bin
+from .r_libs import r_bp as _libr_bp
+from .r_libs import r_config as _libr_config
+from .r_libs import r_cons as _libr_cons
+from .r_libs import r_core as _libr_core
+from .r_libs import r_crypto as _libr_crypto
+from .r_libs import r_debug as _libr_debug
+from .r_libs import r_egg as _libr_egg
+from .r_libs import r_flag as _libr_flag
+from .r_libs import r_fs as _libr_fs
+from .r_libs import r_hash as _libr_hash
+from .r_libs import r_io as _libr_io
+from .r_libs import r_lang as _libr_lang
+from .r_libs import r_magic as _libr_magic
+from .r_libs import r_main as _libr_main
+from .r_libs import r_parse as _libr_parse
+from .r_libs import r_reg as _libr_reg
+from .r_libs import r_search as _libr_search
+from .r_libs import r_socket as _libr_socket
+from .r_libs import r_syscall as _libr_syscall
+from .r_libs import r_util as _libr_util
 
 
 _libraries = {}
@@ -594,10 +594,10 @@ RConsColorMode__enumvalues = c__EA_RConsColorMode__enumvalues
 class struct_r_cons_context_t(Structure):
     pass
 
-class struct_r_stack_t(Structure):
+class struct_c__SA_RStrBuf(Structure):
     pass
 
-class struct_c__SA_RStrBuf(Structure):
+class struct_r_stack_t(Structure):
     pass
 
 
@@ -788,13 +788,13 @@ struct_r_cons_t._fields_ = [
     ('cpos', RConsCursorPos),
 ]
 
-class struct__IO_marker(Structure):
-    pass
-
 class struct__IO_wide_data(Structure):
     pass
 
 class struct__IO_codecvt(Structure):
+    pass
+
+class struct__IO_marker(Structure):
     pass
 
 struct__IO_FILE._pack_ = 1 # source:False
@@ -834,15 +834,6 @@ struct__IO_FILE._fields_ = [
 
 class struct_r_num_calc_t(Structure):
     pass
-
-class struct_c__SA_RNumCalcValue(Structure):
-    pass
-
-struct_c__SA_RNumCalcValue._pack_ = 1 # source:False
-struct_c__SA_RNumCalcValue._fields_ = [
-    ('d', ctypes.c_double),
-    ('n', ctypes.c_uint64),
-]
 
 
 # values for enumeration 'c__EA_RNumCalcToken'
@@ -893,6 +884,15 @@ RNCSHR = 62
 RNCROL = 35
 RNCROR = 36
 c__EA_RNumCalcToken = ctypes.c_uint32 # enum
+class struct_c__SA_RNumCalcValue(Structure):
+    pass
+
+struct_c__SA_RNumCalcValue._pack_ = 1 # source:False
+struct_c__SA_RNumCalcValue._fields_ = [
+    ('d', ctypes.c_double),
+    ('n', ctypes.c_uint64),
+]
+
 struct_r_num_calc_t._pack_ = 1 # source:False
 struct_r_num_calc_t._fields_ = [
     ('curr_tok', c__EA_RNumCalcToken),
@@ -2022,10 +2022,10 @@ struct_c__SA_dict._fields_ = [
 class struct_cdb_make(Structure):
     pass
 
-class struct_cdb_hp(Structure):
+class struct_cdb_hplist(Structure):
     pass
 
-class struct_cdb_hplist(Structure):
+class struct_cdb_hp(Structure):
     pass
 
 class struct_buffer(Structure):

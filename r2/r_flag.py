@@ -5,29 +5,29 @@
 # LONGDOUBLE_SIZE is: 16
 #
 import ctypes
-from .r2libs import r_anal as _libr_anal
-from .r2libs import r_asm as _libr_asm
-from .r2libs import r_bin as _libr_bin
-from .r2libs import r_bp as _libr_bp
-from .r2libs import r_config as _libr_config
-from .r2libs import r_cons as _libr_cons
-from .r2libs import r_core as _libr_core
-from .r2libs import r_crypto as _libr_crypto
-from .r2libs import r_debug as _libr_debug
-from .r2libs import r_egg as _libr_egg
-from .r2libs import r_flag as _libr_flag
-from .r2libs import r_fs as _libr_fs
-from .r2libs import r_hash as _libr_hash
-from .r2libs import r_io as _libr_io
-from .r2libs import r_lang as _libr_lang
-from .r2libs import r_magic as _libr_magic
-from .r2libs import r_main as _libr_main
-from .r2libs import r_parse as _libr_parse
-from .r2libs import r_reg as _libr_reg
-from .r2libs import r_search as _libr_search
-from .r2libs import r_socket as _libr_socket
-from .r2libs import r_syscall as _libr_syscall
-from .r2libs import r_util as _libr_util
+from .r_libs import r_anal as _libr_anal
+from .r_libs import r_asm as _libr_asm
+from .r_libs import r_bin as _libr_bin
+from .r_libs import r_bp as _libr_bp
+from .r_libs import r_config as _libr_config
+from .r_libs import r_cons as _libr_cons
+from .r_libs import r_core as _libr_core
+from .r_libs import r_crypto as _libr_crypto
+from .r_libs import r_debug as _libr_debug
+from .r_libs import r_egg as _libr_egg
+from .r_libs import r_flag as _libr_flag
+from .r_libs import r_fs as _libr_fs
+from .r_libs import r_hash as _libr_hash
+from .r_libs import r_io as _libr_io
+from .r_libs import r_lang as _libr_lang
+from .r_libs import r_magic as _libr_magic
+from .r_libs import r_main as _libr_main
+from .r_libs import r_parse as _libr_parse
+from .r_libs import r_reg as _libr_reg
+from .r_libs import r_search as _libr_search
+from .r_libs import r_socket as _libr_socket
+from .r_libs import r_syscall as _libr_syscall
+from .r_libs import r_util as _libr_util
 
 
 _libraries = {}
@@ -262,13 +262,13 @@ RFlagItem = struct_r_flag_item_t
 class struct_r_flag_t(Structure):
     pass
 
-class struct_sdb_t(Structure):
+class struct_ht_pp_t(Structure):
     pass
 
 class struct_r_num_t(Structure):
     pass
 
-class struct_ht_pp_t(Structure):
+class struct_sdb_t(Structure):
     pass
 
 class struct_r_skiplist_t(Structure):
@@ -379,6 +379,35 @@ struct_ht_up_kv._fields_ = [
 class struct_ls_t(Structure):
     pass
 
+class struct_cdb(Structure):
+    pass
+
+struct_cdb._pack_ = 1 # source:False
+struct_cdb._fields_ = [
+    ('map', ctypes.POINTER(ctypes.c_char)),
+    ('fd', ctypes.c_int32),
+    ('size', ctypes.c_uint32),
+    ('loop', ctypes.c_uint32),
+    ('khash', ctypes.c_uint32),
+    ('kpos', ctypes.c_uint32),
+    ('hpos', ctypes.c_uint32),
+    ('hslots', ctypes.c_uint32),
+    ('dpos', ctypes.c_uint32),
+    ('dlen', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+]
+
+class struct_c__SA_dict(Structure):
+    pass
+
+struct_c__SA_dict._pack_ = 1 # source:False
+struct_c__SA_dict._fields_ = [
+    ('table', ctypes.POINTER(ctypes.POINTER(None))),
+    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
+    ('size', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+]
+
 class struct_cdb_make(Structure):
     pass
 
@@ -417,24 +446,6 @@ struct_cdb_make._fields_ = [
     ('fd', ctypes.c_int32),
 ]
 
-class struct_cdb(Structure):
-    pass
-
-struct_cdb._pack_ = 1 # source:False
-struct_cdb._fields_ = [
-    ('map', ctypes.POINTER(ctypes.c_char)),
-    ('fd', ctypes.c_int32),
-    ('size', ctypes.c_uint32),
-    ('loop', ctypes.c_uint32),
-    ('khash', ctypes.c_uint32),
-    ('kpos', ctypes.c_uint32),
-    ('hpos', ctypes.c_uint32),
-    ('hslots', ctypes.c_uint32),
-    ('dpos', ctypes.c_uint32),
-    ('dlen', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-]
-
 class struct_sdb_kv(Structure):
     pass
 
@@ -455,17 +466,6 @@ struct_sdb_kv._fields_ = [
     ('cas', ctypes.c_uint32),
     ('PADDING_0', ctypes.c_ubyte * 4),
     ('expire', ctypes.c_uint64),
-]
-
-class struct_c__SA_dict(Structure):
-    pass
-
-struct_c__SA_dict._pack_ = 1 # source:False
-struct_c__SA_dict._fields_ = [
-    ('table', ctypes.POINTER(ctypes.POINTER(None))),
-    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
-    ('size', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
 ]
 
 struct_sdb_t._pack_ = 1 # source:False

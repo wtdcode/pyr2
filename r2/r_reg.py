@@ -5,29 +5,29 @@
 # LONGDOUBLE_SIZE is: 16
 #
 import ctypes
-from .r2libs import r_anal as _libr_anal
-from .r2libs import r_asm as _libr_asm
-from .r2libs import r_bin as _libr_bin
-from .r2libs import r_bp as _libr_bp
-from .r2libs import r_config as _libr_config
-from .r2libs import r_cons as _libr_cons
-from .r2libs import r_core as _libr_core
-from .r2libs import r_crypto as _libr_crypto
-from .r2libs import r_debug as _libr_debug
-from .r2libs import r_egg as _libr_egg
-from .r2libs import r_flag as _libr_flag
-from .r2libs import r_fs as _libr_fs
-from .r2libs import r_hash as _libr_hash
-from .r2libs import r_io as _libr_io
-from .r2libs import r_lang as _libr_lang
-from .r2libs import r_magic as _libr_magic
-from .r2libs import r_main as _libr_main
-from .r2libs import r_parse as _libr_parse
-from .r2libs import r_reg as _libr_reg
-from .r2libs import r_search as _libr_search
-from .r2libs import r_socket as _libr_socket
-from .r2libs import r_syscall as _libr_syscall
-from .r2libs import r_util as _libr_util
+from .r_libs import r_anal as _libr_anal
+from .r_libs import r_asm as _libr_asm
+from .r_libs import r_bin as _libr_bin
+from .r_libs import r_bp as _libr_bp
+from .r_libs import r_config as _libr_config
+from .r_libs import r_cons as _libr_cons
+from .r_libs import r_core as _libr_core
+from .r_libs import r_crypto as _libr_crypto
+from .r_libs import r_debug as _libr_debug
+from .r_libs import r_egg as _libr_egg
+from .r_libs import r_flag as _libr_flag
+from .r_libs import r_fs as _libr_fs
+from .r_libs import r_hash as _libr_hash
+from .r_libs import r_io as _libr_io
+from .r_libs import r_lang as _libr_lang
+from .r_libs import r_magic as _libr_magic
+from .r_libs import r_main as _libr_main
+from .r_libs import r_parse as _libr_parse
+from .r_libs import r_reg as _libr_reg
+from .r_libs import r_search as _libr_search
+from .r_libs import r_socket as _libr_socket
+from .r_libs import r_syscall as _libr_syscall
+from .r_libs import r_util as _libr_util
 
 
 _libraries = {}
@@ -288,10 +288,10 @@ class struct_r_reg_set_t(Structure):
 class struct_r_list_iter_t(Structure):
     pass
 
-class struct_ht_pp_t(Structure):
+class struct_r_list_t(Structure):
     pass
 
-class struct_r_list_t(Structure):
+class struct_ht_pp_t(Structure):
     pass
 
 struct_r_reg_set_t._pack_ = 1 # source:False
@@ -519,6 +519,9 @@ r_reg_get_value.argtypes = [ctypes.POINTER(struct_r_reg_t), ctypes.POINTER(struc
 class struct__utX(Structure):
     pass
 
+class struct__ut256(Structure):
+    pass
+
 class struct__ut128(Structure):
     pass
 
@@ -526,6 +529,12 @@ struct__ut128._pack_ = 1 # source:False
 struct__ut128._fields_ = [
     ('Low', ctypes.c_uint64),
     ('High', ctypes.c_int64),
+]
+
+struct__ut256._pack_ = 1 # source:False
+struct__ut256._fields_ = [
+    ('Low', struct__ut128),
+    ('High', struct__ut128),
 ]
 
 class struct__ut96(Structure):
@@ -537,13 +546,6 @@ struct__ut96._fields_ = [
     ('High', ctypes.c_uint32),
     ('PADDING_0', ctypes.c_ubyte * 4),
 ]
-
-class struct__ut256(Structure):
-    _pack_ = 1 # source:False
-    _fields_ = [
-    ('Low', struct__ut128),
-    ('High', struct__ut128),
-     ]
 
 class struct__ut80(Structure):
     pass

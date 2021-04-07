@@ -5,29 +5,29 @@
 # LONGDOUBLE_SIZE is: 16
 #
 import ctypes
-from .r2libs import r_anal as _libr_anal
-from .r2libs import r_asm as _libr_asm
-from .r2libs import r_bin as _libr_bin
-from .r2libs import r_bp as _libr_bp
-from .r2libs import r_config as _libr_config
-from .r2libs import r_cons as _libr_cons
-from .r2libs import r_core as _libr_core
-from .r2libs import r_crypto as _libr_crypto
-from .r2libs import r_debug as _libr_debug
-from .r2libs import r_egg as _libr_egg
-from .r2libs import r_flag as _libr_flag
-from .r2libs import r_fs as _libr_fs
-from .r2libs import r_hash as _libr_hash
-from .r2libs import r_io as _libr_io
-from .r2libs import r_lang as _libr_lang
-from .r2libs import r_magic as _libr_magic
-from .r2libs import r_main as _libr_main
-from .r2libs import r_parse as _libr_parse
-from .r2libs import r_reg as _libr_reg
-from .r2libs import r_search as _libr_search
-from .r2libs import r_socket as _libr_socket
-from .r2libs import r_syscall as _libr_syscall
-from .r2libs import r_util as _libr_util
+from .r_libs import r_anal as _libr_anal
+from .r_libs import r_asm as _libr_asm
+from .r_libs import r_bin as _libr_bin
+from .r_libs import r_bp as _libr_bp
+from .r_libs import r_config as _libr_config
+from .r_libs import r_cons as _libr_cons
+from .r_libs import r_core as _libr_core
+from .r_libs import r_crypto as _libr_crypto
+from .r_libs import r_debug as _libr_debug
+from .r_libs import r_egg as _libr_egg
+from .r_libs import r_flag as _libr_flag
+from .r_libs import r_fs as _libr_fs
+from .r_libs import r_hash as _libr_hash
+from .r_libs import r_io as _libr_io
+from .r_libs import r_lang as _libr_lang
+from .r_libs import r_magic as _libr_magic
+from .r_libs import r_main as _libr_main
+from .r_libs import r_parse as _libr_parse
+from .r_libs import r_reg as _libr_reg
+from .r_libs import r_search as _libr_search
+from .r_libs import r_socket as _libr_socket
+from .r_libs import r_syscall as _libr_syscall
+from .r_libs import r_util as _libr_util
 
 
 _libraries = {}
@@ -253,6 +253,17 @@ struct_out._fields_ = [
     ('pbuf', ctypes.POINTER(ctypes.c_char)),
 ]
 
+class struct_r_magic_set_2(Structure):
+    pass
+
+struct_r_magic_set_2._pack_ = 1 # source:False
+struct_r_magic_set_2._fields_ = [
+    ('s', ctypes.POINTER(ctypes.c_char)),
+    ('s_len', ctypes.c_uint64),
+    ('offset', ctypes.c_uint64),
+    ('rm_len', ctypes.c_uint64),
+]
+
 class struct_cont(Structure):
     pass
 
@@ -263,17 +274,6 @@ struct_cont._pack_ = 1 # source:False
 struct_cont._fields_ = [
     ('len', ctypes.c_uint64),
     ('li', ctypes.POINTER(struct_level_info)),
-]
-
-class struct_r_magic_set_2(Structure):
-    pass
-
-struct_r_magic_set_2._pack_ = 1 # source:False
-struct_r_magic_set_2._fields_ = [
-    ('s', ctypes.POINTER(ctypes.c_char)),
-    ('s_len', ctypes.c_uint64),
-    ('offset', ctypes.c_uint64),
-    ('rm_len', ctypes.c_uint64),
 ]
 
 struct_r_magic_set._pack_ = 1 # source:False

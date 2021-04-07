@@ -7,6 +7,7 @@ import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
 import sys
+import re
 
 libs = [
     "anal",
@@ -56,33 +57,74 @@ def find_lib(builddir, lib_name):
             return p
     return None
 
-def handle_lib(lib, pargs):
-    lib_path = libs_path[lib]
+def clang2py_common_args(pargs):
     args = ["clang2py"]
     #args += ['-x']
     args += ["-v"]
     for _, v in libs_path.items():
         args += ["-l", str(v.resolve())]
     args += ["--clang-args", gen_clang_args(pargs.build)]
-    args += [str(Path(pargs.build) / "include" / "libr" / f"r_{lib}.h")]
+    return args
+
+def clang2py_parse_header(pargs, header_path):
+    args = clang2py_common_args(pargs)
+    args += [header_path]
     p = verbose_call(args, stdout=subprocess.PIPE)
-    binding = p.stdout.decode("utf-8")
-    # Enable this line until ctypeslibs becomes stable enough.
-    # binding = binding.replace("_libraries['FIXME_STUB']", f"_libr_stub")
+    return p.stdout.decode("utf-8")
+
+def post_handle(binding_content, lib_name):
+    lib_path = libs_path[lib_name]
+    # Convert the lib reference to imported r2lib.
+    # e.g.
+    # _libraries['libr_core.so.5.2.0-git'] => _libr_core
     for _lib in libs:
-        binding = binding.replace(f"_libraries['{libs_path[_lib].name}']", f"_libr_{_lib}")
-    binding = binding.replace("import ctypes", "import ctypes\n" + "\n".join([f"from .r2libs import r_{_lib} as _libr_{_lib}" for _lib in libs]))
-    fpath = Path(pargs.output) / f"r2{lib}.py"
-    with open(fpath, "w+") as f:
-        f.write(binding)
-    # Delete the redundant assignment.
-    # verbose_call(["sed", "-i", r"/_libraries = {}/d", str(fpath)])
-    verbose_call(["sed", "-i", rf"/ctypes.CDLL.*{libs_path[lib].name}/d", str(fpath)])
-    # for _lib in libs:
-    #     verbose_call(["sed", "-i", rf"/libr_{_lib}.so/d", str(fpath)])
+        binding_content = binding_content.replace(f"_libraries['{libs_path[_lib].name}']", f"_libr_{_lib}")
+    # Import all r2libs.
+    binding_content = binding_content.replace("import ctypes", "import ctypes\n" + "\n".join([f"from .r_libs import r_{_lib} as _libr_{_lib}" for _lib in libs]))
+    # Remove the redundant assignment
+    # e.g. 
+    # _libr_core = ctypes.CDLL('/path/to/libr_core.so.5.2.0-git')
+    binding_content = re.sub(rf".*ctypes.CDLL.*{lib_path.name}.*\n", "", binding_content)
     # Remove clang2py args in comments.
-    verbose_call(["sed", "-i", r"/TARGET arch/d", str(fpath)])
+    # e.g.
+    # TARGET arch is: ['arg1', 'arg2']
+    binding_content = re.sub(rf".*TARGET arch is.*\n", "", binding_content)
     
+    return binding_content
+
+# We have to expand r_util manually.
+# Note that we don't need to expand headers deeper since we only focus on R_API.
+# FIXME: Any better approach?
+def expand_util(pargs):
+    r_util_path = Path(pargs.build) / "include" / "libr" / "r_util.h"
+    r_util_gen_path = Path(pargs.build) / "include" / "libr" / "r_util_gen.h"
+    with open(r_util_path, "r+") as f:
+        content = f.read()
+    sub_utils_headers = re.findall(r'\n#include "r_util/(r_.*.h)"', content)
+    for header in sub_utils_headers:
+        with open(Path(pargs.build) / "include" / "libr" / "r_util" / header) as f:
+            content = content.replace(f'#include "r_util/{header}"', f.read())
+        with open(f"/tmp/r_util_{header}", "w+") as f:
+            f.write(content)
+    with open(r_util_gen_path, "w+") as f:
+        f.write(content)
+
+def handle_lib(lib, pargs):
+    if lib == "util":
+        expand_util(pargs)
+        fpath = str(Path(pargs.build) / "include" / "libr" / f"r_util_gen.h")
+    else:
+        fpath = str(Path(pargs.build) / "include" / "libr" / f"r_{lib}.h")
+    binding = clang2py_parse_header(pargs, fpath)
+    
+    binding = post_handle(binding, lib)
+    with open(Path(pargs.output) / f"r_{lib}.py", "w+") as f:
+        f.write(binding)
+
+def handle_init(pargs):
+    root_init_path = Path(pargs.output) / "__init__.py"
+    with open(Path(pargs.output) / "__init__.py", "w+") as f:
+        f.write("\n".join([f"from .r_{_lib} import *" for _lib in libs]))
 
 parser = ArgumentParser("r2 python bindings generator")
 parser.add_argument("-O", "--output", help="output dir", type=str)
@@ -104,6 +146,4 @@ if pargs.lib is not None:
 else:
     for lib in libs:
         handle_lib(lib, pargs)
-    with open(Path(pargs.output) / "__init__.py", "w+") as f:
-        for lib in libs:
-            f.write(f"from .r2{lib} import *\n")
+    handle_init(pargs)
