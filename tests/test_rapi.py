@@ -3,22 +3,30 @@ import ctypes
 import r2
 import json
 import struct
+import sys
+
+if sys.platform == "win32":
+    example_file = b"""C:\Windows\system32\cmd.exe"""
+else:
+    example_file = b"/bin/ls"
 
 class RAPITest(unittest.TestCase):
     
-    def test_r_core(self):
+    def __get_r_core(self):
         r2c = r2.r_core.r_core_new()
-        fh = r2.r_core.r_core_file_open(r2c, ctypes.create_string_buffer(b"/bin/ls"), 0b101, 0)
-        r2.r_core.r_core_bin_load(r2c, ctypes.create_string_buffer(b"/bin/ls"), (1<<64) - 1)
+        fh = r2.r_core.r_core_file_open(r2c, ctypes.create_string_buffer(example_file), 0b101, 0)
+        r2.r_core.r_core_bin_load(r2c, ctypes.create_string_buffer(example_file), (1<<64) - 1)
+        return r2c
+
+    def test_r_core(self):
+        r2c = self.__get_r_core()
         r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"ieq"))
         r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"aaa"))
         print(f'Disasm 1 instruction:\n{ctypes.string_at(r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"pd 1"))).decode("utf-8")}')
         r2.r_core.r_core_free(r2c)
 
     def test_r_anal(self):
-        r2c = r2.r_core.r_core_new()
-        fh = r2.r_core.r_core_file_open(r2c, ctypes.create_string_buffer(b"/bin/ls"), 0b101, 0)
-        r2.r_core.r_core_bin_load(r2c, ctypes.create_string_buffer(b"/bin/ls"), (1<<64) - 1)
+        r2c = self.__get_r_core()
         r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"ieq"))
         r2.r_core.r_core_cmd_str(r2c, ctypes.create_string_buffer(b"aaa"))
         # Workaround for multiple declarations in sources.
@@ -28,9 +36,7 @@ class RAPITest(unittest.TestCase):
     def test_r_asm(self):
         buffer = b"\x90\x90\x90"
         buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ubyte))
-        r2c = r2.r_core.r_core_new()
-        fh = r2.r_core.r_core_file_open(r2c, ctypes.create_string_buffer(b"/bin/ls"), 0b101, 0)
-        r2.r_core.r_core_bin_load(r2c, ctypes.create_string_buffer(b"/bin/ls"), (1<<64) - 1)
+        r2c = self.__get_r_core()
         r2asm = ctypes.cast(r2c.contents.rasm, ctypes.POINTER(r2.r_asm.struct_r_asm_t))
         asmcode = r2.r_asm.r_asm_mdisassemble(r2asm, buffer, 3)
         disasm_output = ctypes.string_at(asmcode.contents.assembly).decode('utf-8')
