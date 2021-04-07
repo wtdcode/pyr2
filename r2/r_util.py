@@ -4156,6 +4156,27 @@ struct_r_cons_printable_palette_t._fields_ = [
     ('PADDING_0', ctypes.c_ubyte * 4),
 ]
 
+
+# values for enumeration 'r_log_level'
+r_log_level__enumvalues = {
+    0: 'R_LOGLVL_SILLY',
+    1: 'R_LOGLVL_DEBUG',
+    2: 'R_LOGLVL_VERBOSE',
+    3: 'R_LOGLVL_INFO',
+    4: 'R_LOGLVL_WARN',
+    5: 'R_LOGLVL_ERROR',
+    6: 'R_LOGLVL_FATAL',
+    255: 'R_LOGLVL_NONE',
+}
+R_LOGLVL_SILLY = 0
+R_LOGLVL_DEBUG = 1
+R_LOGLVL_VERBOSE = 2
+R_LOGLVL_INFO = 3
+R_LOGLVL_WARN = 4
+R_LOGLVL_ERROR = 5
+R_LOGLVL_FATAL = 6
+R_LOGLVL_NONE = 255
+r_log_level = ctypes.c_uint32 # enum
 class struct_r_cons_grep_t(Structure):
     pass
 
@@ -4195,27 +4216,6 @@ struct_r_cons_grep_t._fields_ = [
     ('PADDING_5', ctypes.c_ubyte * 4),
 ]
 
-
-# values for enumeration 'r_log_level'
-r_log_level__enumvalues = {
-    0: 'R_LOGLVL_SILLY',
-    1: 'R_LOGLVL_DEBUG',
-    2: 'R_LOGLVL_VERBOSE',
-    3: 'R_LOGLVL_INFO',
-    4: 'R_LOGLVL_WARN',
-    5: 'R_LOGLVL_ERROR',
-    6: 'R_LOGLVL_FATAL',
-    255: 'R_LOGLVL_NONE',
-}
-R_LOGLVL_SILLY = 0
-R_LOGLVL_DEBUG = 1
-R_LOGLVL_VERBOSE = 2
-R_LOGLVL_INFO = 3
-R_LOGLVL_WARN = 4
-R_LOGLVL_ERROR = 5
-R_LOGLVL_FATAL = 6
-R_LOGLVL_NONE = 255
-r_log_level = ctypes.c_uint32 # enum
 struct_r_cons_context_t._pack_ = 1 # source:False
 struct_r_cons_context_t._fields_ = [
     ('grep', struct_r_cons_grep_t),

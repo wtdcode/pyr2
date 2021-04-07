@@ -2022,23 +2022,6 @@ class struct_r_anal_value_t(Structure):
     pass
 
 
-# values for enumeration 'c__EA_RAnalOpPrefix'
-c__EA_RAnalOpPrefix__enumvalues = {
-    1: 'R_ANAL_OP_PREFIX_COND',
-    2: 'R_ANAL_OP_PREFIX_REP',
-    4: 'R_ANAL_OP_PREFIX_REPNE',
-    8: 'R_ANAL_OP_PREFIX_LOCK',
-    16: 'R_ANAL_OP_PREFIX_LIKELY',
-    32: 'R_ANAL_OP_PREFIX_UNLIKELY',
-}
-R_ANAL_OP_PREFIX_COND = 1
-R_ANAL_OP_PREFIX_REP = 2
-R_ANAL_OP_PREFIX_REPNE = 4
-R_ANAL_OP_PREFIX_LOCK = 8
-R_ANAL_OP_PREFIX_LIKELY = 16
-R_ANAL_OP_PREFIX_UNLIKELY = 32
-c__EA_RAnalOpPrefix = ctypes.c_uint32 # enum
-
 # values for enumeration 'r_anal_data_type_t'
 r_anal_data_type_t__enumvalues = {
     0: 'R_ANAL_DATATYPE_NULL',
@@ -2082,6 +2065,23 @@ R_ANAL_STACK_SET = 4
 R_ANAL_STACK_RESET = 5
 R_ANAL_STACK_ALIGN = 6
 c__EA_RAnalStackOp = ctypes.c_uint32 # enum
+
+# values for enumeration 'c__EA_RAnalOpPrefix'
+c__EA_RAnalOpPrefix__enumvalues = {
+    1: 'R_ANAL_OP_PREFIX_COND',
+    2: 'R_ANAL_OP_PREFIX_REP',
+    4: 'R_ANAL_OP_PREFIX_REPNE',
+    8: 'R_ANAL_OP_PREFIX_LOCK',
+    16: 'R_ANAL_OP_PREFIX_LIKELY',
+    32: 'R_ANAL_OP_PREFIX_UNLIKELY',
+}
+R_ANAL_OP_PREFIX_COND = 1
+R_ANAL_OP_PREFIX_REP = 2
+R_ANAL_OP_PREFIX_REPNE = 4
+R_ANAL_OP_PREFIX_LOCK = 8
+R_ANAL_OP_PREFIX_LIKELY = 16
+R_ANAL_OP_PREFIX_UNLIKELY = 32
+c__EA_RAnalOpPrefix = ctypes.c_uint32 # enum
 
 # values for enumeration 'c__EA_RAnalOpDirection'
 c__EA_RAnalOpDirection__enumvalues = {
@@ -2463,17 +2463,6 @@ struct_r_interval_node_t._fields_ = [
 ]
 
 
-# values for enumeration 'PJEncodingNum'
-PJEncodingNum__enumvalues = {
-    0: 'PJ_ENCODING_NUM_DEFAULT',
-    1: 'PJ_ENCODING_NUM_STR',
-    2: 'PJ_ENCODING_NUM_HEX',
-}
-PJ_ENCODING_NUM_DEFAULT = 0
-PJ_ENCODING_NUM_STR = 1
-PJ_ENCODING_NUM_HEX = 2
-PJEncodingNum = ctypes.c_uint32 # enum
-
 # values for enumeration 'PJEncodingStr'
 PJEncodingStr__enumvalues = {
     0: 'PJ_ENCODING_STR_DEFAULT',
@@ -2488,6 +2477,17 @@ PJ_ENCODING_STR_HEX = 2
 PJ_ENCODING_STR_ARRAY = 3
 PJ_ENCODING_STR_STRIP = 4
 PJEncodingStr = ctypes.c_uint32 # enum
+
+# values for enumeration 'PJEncodingNum'
+PJEncodingNum__enumvalues = {
+    0: 'PJ_ENCODING_NUM_DEFAULT',
+    1: 'PJ_ENCODING_NUM_STR',
+    2: 'PJ_ENCODING_NUM_HEX',
+}
+PJ_ENCODING_NUM_DEFAULT = 0
+PJ_ENCODING_NUM_STR = 1
+PJ_ENCODING_NUM_HEX = 2
+PJEncodingNum = ctypes.c_uint32 # enum
 struct_pj_t._pack_ = 1 # source:False
 struct_pj_t._fields_ = [
     ('sb', struct_c__SA_RStrBuf),
