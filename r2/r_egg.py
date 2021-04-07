@@ -329,10 +329,10 @@ class struct_r_egg_emit_t(Structure):
 class struct_r_syscall_t(Structure):
     pass
 
-class struct_sdb_t(Structure):
+class struct_r_asm_t(Structure):
     pass
 
-class struct_r_asm_t(Structure):
+class struct_sdb_t(Structure):
     pass
 
 struct_r_egg_t._pack_ = 1 # source:False
@@ -1487,13 +1487,13 @@ class struct_r_flag_item_t(Structure):
 class struct_r_flag_t(Structure):
     pass
 
-class struct_r_anal_function_t(Structure):
-    pass
-
 class struct_r_anal_bind_t(Structure):
     pass
 
 class struct_r_anal_t(Structure):
+    pass
+
+class struct_r_anal_function_t(Structure):
     pass
 
 class struct_r_anal_hint_t(Structure):
@@ -1747,9 +1747,6 @@ struct_r_anal_diff_t._fields_ = [
     ('PADDING_1', ctypes.c_ubyte * 4),
 ]
 
-class struct_r_anal_esil_t(Structure):
-    pass
-
 class struct_r_reg_t(Structure):
     pass
 
@@ -1759,21 +1756,22 @@ class struct_r_anal_plugin_t(Structure):
 class struct_r_anal_esil_plugin_t(Structure):
     pass
 
+class struct_r_anal_esil_t(Structure):
+    pass
+
 class struct_r_anal_range_t(Structure):
     pass
 
-class struct_r_anal_callbacks_t(Structure):
+class struct_r_interval_tree_t(Structure):
     pass
 
-class struct_r_anal_bb_t(Structure):
+class struct_r_interval_node_t(Structure):
     pass
 
-struct_r_anal_callbacks_t._pack_ = 1 # source:False
-struct_r_anal_callbacks_t._fields_ = [
-    ('on_fcn_new', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t))),
-    ('on_fcn_delete', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t))),
-    ('on_fcn_rename', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t), ctypes.POINTER(ctypes.c_char))),
-    ('on_fcn_bb_new', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t), ctypes.POINTER(struct_r_anal_bb_t))),
+struct_r_interval_tree_t._pack_ = 1 # source:False
+struct_r_interval_tree_t._fields_ = [
+    ('root', ctypes.POINTER(struct_r_interval_node_t)),
+    ('free', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
 ]
 
 class struct_r_anal_options_t(Structure):
@@ -1816,6 +1814,20 @@ struct_r_anal_options_t._fields_ = [
     ('PADDING_2', ctypes.c_ubyte * 3),
 ]
 
+class struct_r_anal_callbacks_t(Structure):
+    pass
+
+class struct_r_anal_bb_t(Structure):
+    pass
+
+struct_r_anal_callbacks_t._pack_ = 1 # source:False
+struct_r_anal_callbacks_t._fields_ = [
+    ('on_fcn_new', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t))),
+    ('on_fcn_delete', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t))),
+    ('on_fcn_rename', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t), ctypes.POINTER(ctypes.c_char))),
+    ('on_fcn_bb_new', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t), ctypes.POINTER(struct_r_anal_bb_t))),
+]
+
 
 # values for enumeration 'c__EA_RAnalCPPABI'
 c__EA_RAnalCPPABI__enumvalues = {
@@ -1852,18 +1864,6 @@ class struct_r_anal_hint_cb_t(Structure):
 struct_r_anal_hint_cb_t._pack_ = 1 # source:False
 struct_r_anal_hint_cb_t._fields_ = [
     ('on_bits', ctypes.CFUNCTYPE(None, ctypes.POINTER(struct_r_anal_t), ctypes.c_uint64, ctypes.c_int32, ctypes.c_bool)),
-]
-
-class struct_r_interval_tree_t(Structure):
-    pass
-
-class struct_r_interval_node_t(Structure):
-    pass
-
-struct_r_interval_tree_t._pack_ = 1 # source:False
-struct_r_interval_tree_t._fields_ = [
-    ('root', ctypes.POINTER(struct_r_interval_node_t)),
-    ('free', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
 ]
 
 struct_r_anal_t._pack_ = 1 # source:False

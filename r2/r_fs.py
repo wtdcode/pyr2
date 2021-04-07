@@ -316,22 +316,22 @@ struct_r_io_bind_t._fields_ = [
     ('ptrace_func', ctypes.CFUNCTYPE(ctypes.POINTER(None), ctypes.POINTER(struct_r_io_t), ctypes.CFUNCTYPE(ctypes.POINTER(None), ctypes.POINTER(None)), ctypes.POINTER(None))),
 ]
 
-class struct_ls_t(Structure):
-    pass
-
-class struct_ptrace_wrap_instance_t(Structure):
-    pass
-
-class struct_r_id_pool_t(Structure):
-    pass
-
 class struct_r_event_t(Structure):
     pass
 
 class struct_r_cache_t(Structure):
     pass
 
+class struct_ls_t(Structure):
+    pass
+
 class struct_r_id_storage_t(Structure):
+    pass
+
+class struct_r_id_pool_t(Structure):
+    pass
+
+class struct_ptrace_wrap_instance_t(Structure):
     pass
 
 class struct_r_core_bind_t(Structure):
