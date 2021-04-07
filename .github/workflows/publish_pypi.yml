@@ -96,8 +96,8 @@ jobs:
       run: |
         python3 -m pip install setuptools wheel meson
 
-    - name: Clone latest radare2
-      run: git clone https://github.com/radareorg/radare2
+    - name: Clone latest radare2 and update ourselves
+      run: git clone https://github.com/radareorg/radare2 && git pull
 
     - name: Remove link.exe to avoid conflicts and Build distribution 📦 on Windows
       if: matrix.os == 'windows-latest'
