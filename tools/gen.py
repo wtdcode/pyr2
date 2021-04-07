@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 import re
+import os
 
 libs = [
     "anal",
@@ -95,7 +96,6 @@ def post_handle(binding_content, lib_name):
 # We have to expand r_util manually.
 # Note that we don't need to expand headers deeper since we only focus on R_API.
 # FIXME: Any better approach?
-# NOTE: Some headers like "util/r_json.h" are not included in r_util.h.
 def expand_util(pargs):
     r_util_path = Path(pargs.build) / "include" / "libr" / "r_util.h"
     r_util_gen_path = Path(pargs.build) / "include" / "libr" / "r_util_gen.h"
@@ -104,18 +104,16 @@ def expand_util(pargs):
     sub_util_headers = re.findall(r'\n#include "(r_util/r_.*.h)"', content)
     sub_util_headers.extend(re.findall(r"#include <(r_.*h)>", content))
     output_util = ""
+    generated_headers = set()
     for ln in content.splitlines(keepends=True):
         headers = re.findall(r'^#include "(r_util/r_.*.h)"', ln)
         if len(headers) == 0:
             headers = re.findall(r"^#include <(r_.*h)>", ln)
         if len(headers) == 0 and "r_util/r_print.h" in ln:
-            headers = [
-                'r_util/r_annotated_code.h',
-                'r_util/r_graph_drawable.h',
-                'r_util/r_json.h',
-                'r_util/r_print.h',
-                'r_util/r_str_util.h'
-            ]
+            all_utils = set([ f"r_util/{util}" for util in os.listdir(Path(pargs.build) / "include" / "libr" / "r_util")])
+            headers = list(all_utils.difference(generated_headers))
+            print("Going to generate the following utils which are not included in r_util.h")
+            print("\n".join(headers))
         if len(headers) == 0:
             output_util += ln
         else:
@@ -123,6 +121,7 @@ def expand_util(pargs):
                 with open(Path(pargs.build) / "include" / "libr" / header) as f:
                     output_util += f.read()
                     output_util += "\n"
+                generated_headers.add(header)
     with open(r_util_gen_path, "w+") as f:
         f.write(output_util)
 
