@@ -65,7 +65,7 @@ cd pyr2
 git submodule update --init --recursive
 ```
 
-Since radare2 chooses `meson` as their alternative building system, the first step is install `meson`.
+Since radare2 chooses `meson` as their alternative building system and it's cross-platform, the first step is install `meson`.
 
 ```bash
 pip3 install meson
