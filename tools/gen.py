@@ -74,7 +74,6 @@ def clang2py_parse_header(pargs, header_path):
     return p.stdout.decode("utf-8")
 
 def post_handle(binding_content, lib_name):
-    lib_path = libs_path[lib_name]
     # Convert the lib reference to imported r2lib.
     # e.g.
     # _libraries['libr_core.so.5.2.0-git'] => _libr_core
@@ -85,7 +84,8 @@ def post_handle(binding_content, lib_name):
     # Remove the redundant assignment
     # e.g. 
     # _libr_core = ctypes.CDLL('/path/to/libr_core.so.5.2.0-git')
-    binding_content = re.sub(rf".*ctypes.CDLL.*{lib_path.name}.*\n", "", binding_content)
+    for _lib in libs:
+        binding_content = re.sub(rf".*ctypes.CDLL.*{libs_path[_lib].name}.*\n", "", binding_content)
     # Remove clang2py args in comments.
     # e.g.
     # TARGET arch is: ['arg1', 'arg2']
