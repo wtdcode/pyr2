@@ -33,6 +33,9 @@ jobs:
     
     - name: Generate bindings
       run: cd tools && python3 gen.py -O ../r2/ -B ../radare2/pyr2installdir/ && cd ..
+
+    - name: Test bindings
+      run: python3 -m pip install -e . && cd tests && python3 test_rapi.py
     
     - name: Set up git.
       run: git config --global user.email mio@lazym.io && git config --global user.name action
@@ -88,20 +91,22 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install setuptools wheel meson
+        python3 -m pip install setuptools wheel meson
 
     - name: Remove link.exe to avoid conflicts and Build distribution 📦 on Windows
       if: matrix.os == 'windows-latest'
       shell: cmd
       run: |
           del /f "C:\Program Files\Git\mingw64\bin\link.exe"
-          python setup.py bdist_wheel
+          python3 setup.py bdist_wheel
       
     - name: Build distribution 📦
       if: matrix.os != 'windows-latest'
       shell: bash
-      run: |
-          python setup.py bdist_wheel
+      run: python3 setup.py bdist_wheel
+    
+    - name: Test our build
+      run: python3 -m pip install -e . && cd tests && python3 test_rapi.py
   
     - uses: actions/upload-artifact@v2
       with:
