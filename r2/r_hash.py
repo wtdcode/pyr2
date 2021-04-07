@@ -344,33 +344,34 @@ HASH_INDICES__enumvalues = {
     16: 'R_HASH_IDX_BASE91',
     17: 'R_HASH_IDX_PUNYCODE',
     18: 'R_HASH_IDX_LUHN',
-    19: 'R_HASH_IDX_CRC8_SMBUS',
-    20: 'R_HASH_IDX_CRC15_CAN',
-    21: 'R_HASH_IDX_CRC16',
-    22: 'R_HASH_IDX_CRC16_HDLC',
-    23: 'R_HASH_IDX_CRC16_USB',
-    24: 'R_HASH_IDX_CRC16_CITT',
-    25: 'R_HASH_IDX_CRC24',
-    26: 'R_HASH_IDX_CRC32',
-    27: 'R_HASH_IDX_CRC32C',
-    28: 'R_HASH_IDX_CRC32_ECMA_267',
-    29: 'R_HASH_IDX_CRC32_BZIP2',
-    30: 'R_HASH_IDX_CRC32D',
-    31: 'R_HASH_IDX_CRC32_MPEG2',
-    32: 'R_HASH_IDX_CRC32_POSIX',
-    33: 'R_HASH_IDX_CRC32Q',
-    34: 'R_HASH_IDX_CRC32_JAMCRC',
-    35: 'R_HASH_IDX_CRC32_XFER',
-    36: 'R_HASH_IDX_CRC64',
-    37: 'R_HASH_IDX_CRC64_ECMA182',
-    38: 'R_HASH_IDX_CRC64_WE',
-    39: 'R_HASH_IDX_CRC64_XZ',
-    40: 'R_HASH_IDX_CRC64_ISO',
-    41: 'R_HASH_IDX_FLETCHER8',
-    42: 'R_HASH_IDX_FLETCHER16',
-    43: 'R_HASH_IDX_FLETCHER32',
-    44: 'R_HASH_IDX_FLETCHER64',
-    45: 'R_HASH_NUM_INDICES',
+    19: 'R_HASH_IDX_SSDEEP',
+    20: 'R_HASH_IDX_CRC8_SMBUS',
+    21: 'R_HASH_IDX_CRC15_CAN',
+    22: 'R_HASH_IDX_CRC16',
+    23: 'R_HASH_IDX_CRC16_HDLC',
+    24: 'R_HASH_IDX_CRC16_USB',
+    25: 'R_HASH_IDX_CRC16_CITT',
+    26: 'R_HASH_IDX_CRC24',
+    27: 'R_HASH_IDX_CRC32',
+    28: 'R_HASH_IDX_CRC32C',
+    29: 'R_HASH_IDX_CRC32_ECMA_267',
+    30: 'R_HASH_IDX_CRC32_BZIP2',
+    31: 'R_HASH_IDX_CRC32D',
+    32: 'R_HASH_IDX_CRC32_MPEG2',
+    33: 'R_HASH_IDX_CRC32_POSIX',
+    34: 'R_HASH_IDX_CRC32Q',
+    35: 'R_HASH_IDX_CRC32_JAMCRC',
+    36: 'R_HASH_IDX_CRC32_XFER',
+    37: 'R_HASH_IDX_CRC64',
+    38: 'R_HASH_IDX_CRC64_ECMA182',
+    39: 'R_HASH_IDX_CRC64_WE',
+    40: 'R_HASH_IDX_CRC64_XZ',
+    41: 'R_HASH_IDX_CRC64_ISO',
+    42: 'R_HASH_IDX_FLETCHER8',
+    43: 'R_HASH_IDX_FLETCHER16',
+    44: 'R_HASH_IDX_FLETCHER32',
+    45: 'R_HASH_IDX_FLETCHER64',
+    46: 'R_HASH_NUM_INDICES',
 }
 R_HASH_IDX_MD5 = 0
 R_HASH_IDX_SHA1 = 1
@@ -391,33 +392,34 @@ R_HASH_IDX_BASE64 = 15
 R_HASH_IDX_BASE91 = 16
 R_HASH_IDX_PUNYCODE = 17
 R_HASH_IDX_LUHN = 18
-R_HASH_IDX_CRC8_SMBUS = 19
-R_HASH_IDX_CRC15_CAN = 20
-R_HASH_IDX_CRC16 = 21
-R_HASH_IDX_CRC16_HDLC = 22
-R_HASH_IDX_CRC16_USB = 23
-R_HASH_IDX_CRC16_CITT = 24
-R_HASH_IDX_CRC24 = 25
-R_HASH_IDX_CRC32 = 26
-R_HASH_IDX_CRC32C = 27
-R_HASH_IDX_CRC32_ECMA_267 = 28
-R_HASH_IDX_CRC32_BZIP2 = 29
-R_HASH_IDX_CRC32D = 30
-R_HASH_IDX_CRC32_MPEG2 = 31
-R_HASH_IDX_CRC32_POSIX = 32
-R_HASH_IDX_CRC32Q = 33
-R_HASH_IDX_CRC32_JAMCRC = 34
-R_HASH_IDX_CRC32_XFER = 35
-R_HASH_IDX_CRC64 = 36
-R_HASH_IDX_CRC64_ECMA182 = 37
-R_HASH_IDX_CRC64_WE = 38
-R_HASH_IDX_CRC64_XZ = 39
-R_HASH_IDX_CRC64_ISO = 40
-R_HASH_IDX_FLETCHER8 = 41
-R_HASH_IDX_FLETCHER16 = 42
-R_HASH_IDX_FLETCHER32 = 43
-R_HASH_IDX_FLETCHER64 = 44
-R_HASH_NUM_INDICES = 45
+R_HASH_IDX_SSDEEP = 19
+R_HASH_IDX_CRC8_SMBUS = 20
+R_HASH_IDX_CRC15_CAN = 21
+R_HASH_IDX_CRC16 = 22
+R_HASH_IDX_CRC16_HDLC = 23
+R_HASH_IDX_CRC16_USB = 24
+R_HASH_IDX_CRC16_CITT = 25
+R_HASH_IDX_CRC24 = 26
+R_HASH_IDX_CRC32 = 27
+R_HASH_IDX_CRC32C = 28
+R_HASH_IDX_CRC32_ECMA_267 = 29
+R_HASH_IDX_CRC32_BZIP2 = 30
+R_HASH_IDX_CRC32D = 31
+R_HASH_IDX_CRC32_MPEG2 = 32
+R_HASH_IDX_CRC32_POSIX = 33
+R_HASH_IDX_CRC32Q = 34
+R_HASH_IDX_CRC32_JAMCRC = 35
+R_HASH_IDX_CRC32_XFER = 36
+R_HASH_IDX_CRC64 = 37
+R_HASH_IDX_CRC64_ECMA182 = 38
+R_HASH_IDX_CRC64_WE = 39
+R_HASH_IDX_CRC64_XZ = 40
+R_HASH_IDX_CRC64_ISO = 41
+R_HASH_IDX_FLETCHER8 = 42
+R_HASH_IDX_FLETCHER16 = 43
+R_HASH_IDX_FLETCHER32 = 44
+R_HASH_IDX_FLETCHER64 = 45
+R_HASH_NUM_INDICES = 46
 HASH_INDICES = ctypes.c_uint32 # enum
 r_hash_new = _libr_hash.r_hash_new
 r_hash_new.restype = ctypes.POINTER(struct_r_hash_t)
@@ -428,6 +430,9 @@ r_hash_free.argtypes = [ctypes.POINTER(struct_r_hash_t)]
 r_hash_do_md4 = _libr_hash.r_hash_do_md4
 r_hash_do_md4.restype = ctypes.POINTER(ctypes.c_ubyte)
 r_hash_do_md4.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
+r_hash_do_ssdeep = _libr_hash.r_hash_do_ssdeep
+r_hash_do_ssdeep.restype = ctypes.POINTER(ctypes.c_ubyte)
+r_hash_do_ssdeep.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
 r_hash_do_md5 = _libr_hash.r_hash_do_md5
 r_hash_do_md5.restype = ctypes.POINTER(ctypes.c_ubyte)
 r_hash_do_md5.argtypes = [ctypes.POINTER(struct_r_hash_t), ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int32]
@@ -485,6 +490,9 @@ r_hash_mod255.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
 r_hash_luhn = _libr_hash.r_hash_luhn
 r_hash_luhn.restype = ctypes.c_uint64
 r_hash_luhn.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint64]
+r_hash_ssdeep = _libr_hash.r_hash_ssdeep
+r_hash_ssdeep.restype = ctypes.POINTER(ctypes.c_char)
+r_hash_ssdeep.argtypes = [ctypes.POINTER(ctypes.c_ubyte), size_t]
 r_hash_crc_preset = _libr_hash.r_hash_crc_preset
 r_hash_crc_preset.restype = utcrc
 r_hash_crc_preset.argtypes = [ctypes.POINTER(ctypes.c_ubyte), ctypes.c_uint32, CRC_PRESETS]
@@ -538,19 +546,20 @@ __all__ = \
     'R_HASH_IDX_MD4', 'R_HASH_IDX_MD5', 'R_HASH_IDX_MOD255',
     'R_HASH_IDX_PARITY', 'R_HASH_IDX_PCPRINT', 'R_HASH_IDX_PUNYCODE',
     'R_HASH_IDX_SHA1', 'R_HASH_IDX_SHA256', 'R_HASH_IDX_SHA384',
-    'R_HASH_IDX_SHA512', 'R_HASH_IDX_XOR', 'R_HASH_IDX_XORPAIR',
-    'R_HASH_IDX_XXHASH', 'R_HASH_NUM_INDICES', 'R_MD5_CTX',
-    'R_SHA256_CTX', 'R_SHA384_CTX', 'R_SHA512_CTX', 'R_SHA_CTX',
-    'r_hash_adler32', 'r_hash_calculate', 'r_hash_crc_preset',
-    'r_hash_deviation', 'r_hash_do_begin', 'r_hash_do_end',
-    'r_hash_do_hmac_sha256', 'r_hash_do_md4', 'r_hash_do_md5',
-    'r_hash_do_sha1', 'r_hash_do_sha256', 'r_hash_do_sha384',
-    'r_hash_do_sha512', 'r_hash_do_spice', 'r_hash_entropy',
-    'r_hash_entropy_fraction', 'r_hash_fletcher16',
-    'r_hash_fletcher32', 'r_hash_fletcher64', 'r_hash_fletcher8',
-    'r_hash_free', 'r_hash_hamdist', 'r_hash_luhn', 'r_hash_mod255',
-    'r_hash_name', 'r_hash_name_to_bits', 'r_hash_new',
-    'r_hash_parity', 'r_hash_pcprint', 'r_hash_size',
+    'R_HASH_IDX_SHA512', 'R_HASH_IDX_SSDEEP', 'R_HASH_IDX_XOR',
+    'R_HASH_IDX_XORPAIR', 'R_HASH_IDX_XXHASH', 'R_HASH_NUM_INDICES',
+    'R_MD5_CTX', 'R_SHA256_CTX', 'R_SHA384_CTX', 'R_SHA512_CTX',
+    'R_SHA_CTX', 'r_hash_adler32', 'r_hash_calculate',
+    'r_hash_crc_preset', 'r_hash_deviation', 'r_hash_do_begin',
+    'r_hash_do_end', 'r_hash_do_hmac_sha256', 'r_hash_do_md4',
+    'r_hash_do_md5', 'r_hash_do_sha1', 'r_hash_do_sha256',
+    'r_hash_do_sha384', 'r_hash_do_sha512', 'r_hash_do_spice',
+    'r_hash_do_ssdeep', 'r_hash_entropy', 'r_hash_entropy_fraction',
+    'r_hash_fletcher16', 'r_hash_fletcher32', 'r_hash_fletcher64',
+    'r_hash_fletcher8', 'r_hash_free', 'r_hash_hamdist',
+    'r_hash_luhn', 'r_hash_mod255', 'r_hash_name',
+    'r_hash_name_to_bits', 'r_hash_new', 'r_hash_parity',
+    'r_hash_pcprint', 'r_hash_size', 'r_hash_ssdeep',
     'r_hash_to_string', 'r_hash_version', 'r_hash_xor',
     'r_hash_xorpair', 'r_hash_xxhash', 'size_t', 'struct__SHA256_CTX',
     'struct__SHA512_CTX', 'struct_c__SA_R_CRC_CTX',

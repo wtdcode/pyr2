@@ -248,6 +248,15 @@ struct_r_config_t._fields_ = [
 class struct_r_num_calc_t(Structure):
     pass
 
+class struct_c__SA_RNumCalcValue(Structure):
+    pass
+
+struct_c__SA_RNumCalcValue._pack_ = 1 # source:False
+struct_c__SA_RNumCalcValue._fields_ = [
+    ('d', ctypes.c_double),
+    ('n', ctypes.c_uint64),
+]
+
 
 # values for enumeration 'c__EA_RNumCalcToken'
 c__EA_RNumCalcToken__enumvalues = {
@@ -297,15 +306,6 @@ RNCSHR = 62
 RNCROL = 35
 RNCROR = 36
 c__EA_RNumCalcToken = ctypes.c_uint32 # enum
-class struct_c__SA_RNumCalcValue(Structure):
-    pass
-
-struct_c__SA_RNumCalcValue._pack_ = 1 # source:False
-struct_c__SA_RNumCalcValue._fields_ = [
-    ('d', ctypes.c_double),
-    ('n', ctypes.c_uint64),
-]
-
 struct_r_num_calc_t._pack_ = 1 # source:False
 struct_r_num_calc_t._fields_ = [
     ('curr_tok', c__EA_RNumCalcToken),
@@ -471,19 +471,11 @@ r_config_set_getter.argtypes = [ctypes.POINTER(struct_r_config_t), ctypes.POINTE
 class struct_sdb_t(Structure):
     pass
 
+class struct_sdb_gperf_t(Structure):
+    pass
+
 class struct_ls_t(Structure):
     pass
-
-class struct_c__SA_dict(Structure):
-    pass
-
-struct_c__SA_dict._pack_ = 1 # source:False
-struct_c__SA_dict._fields_ = [
-    ('table', ctypes.POINTER(ctypes.POINTER(None))),
-    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
-    ('size', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-]
 
 class struct_cdb_make(Structure):
     pass
@@ -521,6 +513,17 @@ struct_cdb_make._fields_ = [
     ('b', struct_buffer),
     ('pos', ctypes.c_uint32),
     ('fd', ctypes.c_int32),
+]
+
+class struct_c__SA_dict(Structure):
+    pass
+
+struct_c__SA_dict._pack_ = 1 # source:False
+struct_c__SA_dict._fields_ = [
+    ('table', ctypes.POINTER(ctypes.POINTER(None))),
+    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
+    ('size', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
 ]
 
 class struct_sdb_kv(Structure):
@@ -566,6 +569,7 @@ struct_sdb_t._fields_ = [
     ('ht', ctypes.POINTER(struct_ht_pp_t)),
     ('eod', ctypes.c_uint32),
     ('pos', ctypes.c_uint32),
+    ('gp', ctypes.POINTER(struct_sdb_gperf_t)),
     ('fdump', ctypes.c_int32),
     ('PADDING_0', ctypes.c_ubyte * 4),
     ('ndump', ctypes.POINTER(ctypes.c_char)),
@@ -594,6 +598,13 @@ struct_cdb_hplist._fields_ = [
     ('next', ctypes.POINTER(struct_cdb_hplist)),
     ('num', ctypes.c_int32),
     ('PADDING_0', ctypes.c_ubyte * 4),
+]
+
+struct_sdb_gperf_t._pack_ = 1 # source:False
+struct_sdb_gperf_t._fields_ = [
+    ('name', ctypes.POINTER(ctypes.c_char)),
+    ('get', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char))),
+    ('hash', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_char))),
 ]
 
 class struct_ls_iter_t(Structure):
@@ -689,4 +700,5 @@ __all__ = \
     'struct_ls_iter_t', 'struct_ls_t', 'struct_r_config_hold_t',
     'struct_r_config_node_t', 'struct_r_config_t',
     'struct_r_list_iter_t', 'struct_r_list_t', 'struct_r_num_calc_t',
-    'struct_r_num_t', 'struct_sdb_kv', 'struct_sdb_t']
+    'struct_r_num_t', 'struct_sdb_gperf_t', 'struct_sdb_kv',
+    'struct_sdb_t']

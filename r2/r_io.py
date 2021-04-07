@@ -333,25 +333,25 @@ RIOUndoWrite = struct_r_io_undo_w_t
 class struct_r_io_t(Structure):
     pass
 
-class struct_ptrace_wrap_instance_t(Structure):
-    pass
-
-class struct_r_id_storage_t(Structure):
-    pass
-
 class struct_r_event_t(Structure):
-    pass
-
-class struct_r_io_desc_t(Structure):
-    pass
-
-class struct_ls_t(Structure):
     pass
 
 class struct_r_id_pool_t(Structure):
     pass
 
 class struct_r_cache_t(Structure):
+    pass
+
+class struct_ls_t(Structure):
+    pass
+
+class struct_r_id_storage_t(Structure):
+    pass
+
+class struct_ptrace_wrap_instance_t(Structure):
+    pass
+
+class struct_r_io_desc_t(Structure):
     pass
 
 class struct_r_pvector_t(Structure):
@@ -433,6 +433,7 @@ struct_r_io_t._fields_ = [
     ('write_mask', ctypes.POINTER(ctypes.c_ubyte)),
     ('write_mask_len', ctypes.c_int32),
     ('PADDING_3', ctypes.c_ubyte * 4),
+    ('mask', ctypes.c_uint64),
     ('undo', RIOUndo),
     ('plugins', ctypes.POINTER(struct_ls_t)),
     ('runprofile', ctypes.POINTER(ctypes.c_char)),
@@ -444,10 +445,10 @@ struct_r_io_t._fields_ = [
     ('corebind', struct_r_core_bind_t),
 ]
 
-class struct_ht_up_t(Structure):
+class struct_r_io_plugin_t(Structure):
     pass
 
-class struct_r_io_plugin_t(Structure):
+class struct_ht_up_t(Structure):
     pass
 
 struct_r_io_desc_t._pack_ = 1 # source:False
@@ -612,19 +613,6 @@ struct_r_event_t._fields_ = [
 
 RIO = struct_r_io_t
 RIODesc = struct_r_io_desc_t
-class struct_c__SA_RIODescData(Structure):
-    pass
-
-struct_c__SA_RIODescData._pack_ = 1 # source:False
-struct_c__SA_RIODescData._fields_ = [
-    ('magic', ctypes.c_uint32),
-    ('pid', ctypes.c_int32),
-    ('tid', ctypes.c_int32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-    ('data', ctypes.POINTER(None)),
-]
-
-RIODescData = struct_c__SA_RIODescData
 class struct_c__SA_RIORap(Structure):
     pass
 
@@ -781,7 +769,7 @@ struct_r_io_bind_t._fields_ = [
     ('fd_remap', ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.POINTER(struct_r_io_t), ctypes.c_int32, ctypes.c_uint64)),
     ('is_valid_offset', ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.POINTER(struct_r_io_t), ctypes.c_uint64, ctypes.c_int32)),
     ('addr_is_mapped', ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.POINTER(struct_r_io_t), ctypes.c_uint64)),
-    ('map_get', ctypes.CFUNCTYPE(ctypes.POINTER(struct_r_io_map_t), ctypes.POINTER(struct_r_io_t), ctypes.c_uint64)),
+    ('map_get_at', ctypes.CFUNCTYPE(ctypes.POINTER(struct_r_io_map_t), ctypes.POINTER(struct_r_io_t), ctypes.c_uint64)),
     ('map_get_paddr', ctypes.CFUNCTYPE(ctypes.POINTER(struct_r_io_map_t), ctypes.POINTER(struct_r_io_t), ctypes.c_uint64)),
     ('map_add', ctypes.CFUNCTYPE(ctypes.POINTER(struct_r_io_map_t), ctypes.POINTER(struct_r_io_t), ctypes.c_int32, ctypes.c_int32, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64)),
     ('v2p', ctypes.CFUNCTYPE(ctypes.c_uint64, ctypes.POINTER(struct_r_io_t), ctypes.c_uint64)),
@@ -812,18 +800,18 @@ r_io_map_exists.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.POINTER(struct
 r_io_map_exists_for_id = _libr_io.r_io_map_exists_for_id
 r_io_map_exists_for_id.restype = ctypes.c_bool
 r_io_map_exists_for_id.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_uint32]
-r_io_map_resolve = _libr_io.r_io_map_resolve
-r_io_map_resolve.restype = ctypes.POINTER(struct_r_io_map_t)
-r_io_map_resolve.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_uint32]
+r_io_map_get = _libr_io.r_io_map_get
+r_io_map_get.restype = ctypes.POINTER(struct_r_io_map_t)
+r_io_map_get.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_uint32]
 r_io_map_add = _libr_io.r_io_map_add
 r_io_map_add.restype = ctypes.POINTER(struct_r_io_map_t)
 r_io_map_add.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_int32, ctypes.c_int32, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
 r_io_map_add_batch = _libr_io.r_io_map_add_batch
 r_io_map_add_batch.restype = ctypes.POINTER(struct_r_io_map_t)
 r_io_map_add_batch.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_int32, ctypes.c_int32, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
-r_io_map_get = _libr_io.r_io_map_get
-r_io_map_get.restype = ctypes.POINTER(struct_r_io_map_t)
-r_io_map_get.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_uint64]
+r_io_map_get_at = _libr_io.r_io_map_get_at
+r_io_map_get_at.restype = ctypes.POINTER(struct_r_io_map_t)
+r_io_map_get_at.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_uint64]
 r_io_update = _libr_io.r_io_update
 r_io_update.restype = None
 r_io_update.argtypes = [ctypes.POINTER(struct_r_io_t)]
@@ -866,9 +854,9 @@ r_io_map_set_name.argtypes = [ctypes.POINTER(struct_r_io_map_t), ctypes.POINTER(
 r_io_map_del_name = _libr_io.r_io_map_del_name
 r_io_map_del_name.restype = None
 r_io_map_del_name.argtypes = [ctypes.POINTER(struct_r_io_map_t)]
-r_io_map_get_for_fd = _libr_io.r_io_map_get_for_fd
-r_io_map_get_for_fd.restype = ctypes.POINTER(struct_r_list_t)
-r_io_map_get_for_fd.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_int32]
+r_io_map_get_by_fd = _libr_io.r_io_map_get_by_fd
+r_io_map_get_by_fd.restype = ctypes.POINTER(struct_r_list_t)
+r_io_map_get_by_fd.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_int32]
 r_io_map_resize = _libr_io.r_io_map_resize
 r_io_map_resize.restype = ctypes.c_bool
 r_io_map_resize.argtypes = [ctypes.POINTER(struct_r_io_t), ctypes.c_uint32, ctypes.c_uint64]
@@ -1371,54 +1359,53 @@ __all__ = \
     'PTRACE_SINGLESTEP', 'PTRACE_SYSCALL', 'PTRACE_SYSEMU',
     'PTRACE_SYSEMU_SINGLESTEP', 'PTRACE_TRACEME', 'RIO',
     'RIOAddrIsMapped', 'RIOBind', 'RIOCache', 'RIOClose', 'RIODesc',
-    'RIODescCache', 'RIODescData', 'RIODescGet', 'RIODescSize',
-    'RIODescUse', 'RIOFdClose', 'RIOFdGetMap', 'RIOFdGetName',
-    'RIOFdIsDbg', 'RIOFdOpen', 'RIOFdRead', 'RIOFdReadAt',
-    'RIOFdRemap', 'RIOFdResize', 'RIOFdSeek', 'RIOFdSize',
-    'RIOFdWrite', 'RIOFdWriteAt', 'RIOIsValidOff', 'RIOMap',
-    'RIOMapAdd', 'RIOMapGet', 'RIOMapGetPaddr', 'RIOOpen',
-    'RIOOpenAt', 'RIOP2V', 'RIOPlugin', 'RIOPtraceFn',
-    'RIOPtraceFuncFn', 'RIORap', 'RIOReadAt', 'RIOSystem', 'RIOUndo',
-    'RIOUndoWrite', 'RIOUndos', 'RIOV2P', 'RIOWriteAt',
-    '__ptrace_request', 'pid_t', 'r_io_addr_is_mapped',
-    'r_io_alprint', 'r_io_bind', 'r_io_buffer_close',
-    'r_io_buffer_load', 'r_io_buffer_read', 'r_io_cache_at',
-    'r_io_cache_commit', 'r_io_cache_fini', 'r_io_cache_init',
-    'r_io_cache_invalidate', 'r_io_cache_list', 'r_io_cache_read',
-    'r_io_cache_reset', 'r_io_cache_write', 'r_io_close',
-    'r_io_close_all', 'r_io_desc_add', 'r_io_desc_cache_cleanup',
-    'r_io_desc_cache_commit', 'r_io_desc_cache_fini',
-    'r_io_desc_cache_fini_all', 'r_io_desc_cache_init',
-    'r_io_desc_cache_list', 'r_io_desc_cache_read',
-    'r_io_desc_cache_write', 'r_io_desc_close', 'r_io_desc_del',
-    'r_io_desc_exchange', 'r_io_desc_extend', 'r_io_desc_fini',
-    'r_io_desc_free', 'r_io_desc_get', 'r_io_desc_get_base',
-    'r_io_desc_get_highest', 'r_io_desc_get_lowest',
-    'r_io_desc_get_next', 'r_io_desc_get_pid', 'r_io_desc_get_prev',
-    'r_io_desc_get_tid', 'r_io_desc_init', 'r_io_desc_is_blockdevice',
-    'r_io_desc_is_chardevice', 'r_io_desc_is_dbg', 'r_io_desc_new',
-    'r_io_desc_open', 'r_io_desc_open_plugin', 'r_io_desc_read',
-    'r_io_desc_read_at', 'r_io_desc_resize', 'r_io_desc_seek',
-    'r_io_desc_size', 'r_io_desc_write', 'r_io_desc_write_at',
-    'r_io_extend_at', 'r_io_fd_close', 'r_io_fd_get_base',
-    'r_io_fd_get_current', 'r_io_fd_get_highest',
-    'r_io_fd_get_lowest', 'r_io_fd_get_name', 'r_io_fd_get_next',
-    'r_io_fd_get_pid', 'r_io_fd_get_prev', 'r_io_fd_get_tid',
-    'r_io_fd_is_blockdevice', 'r_io_fd_is_chardevice',
-    'r_io_fd_is_dbg', 'r_io_fd_open', 'r_io_fd_read',
-    'r_io_fd_read_at', 'r_io_fd_resize', 'r_io_fd_seek',
-    'r_io_fd_size', 'r_io_fd_write', 'r_io_fd_write_at', 'r_io_fini',
-    'r_io_free', 'r_io_init', 'r_io_is_listener',
-    'r_io_is_valid_offset', 'r_io_map_add', 'r_io_map_add_batch',
-    'r_io_map_cleanup', 'r_io_map_del', 'r_io_map_del_for_fd',
-    'r_io_map_del_name', 'r_io_map_depriorize', 'r_io_map_exists',
-    'r_io_map_exists_for_id', 'r_io_map_fini', 'r_io_map_get',
-    'r_io_map_get_for_fd', 'r_io_map_get_paddr', 'r_io_map_init',
-    'r_io_map_is_in_range', 'r_io_map_is_mapped', 'r_io_map_location',
-    'r_io_map_new', 'r_io_map_next_address',
-    'r_io_map_next_available', 'r_io_map_priorize',
-    'r_io_map_priorize_for_fd', 'r_io_map_remap', 'r_io_map_remap_fd',
-    'r_io_map_reset', 'r_io_map_resize', 'r_io_map_resolve',
+    'RIODescCache', 'RIODescGet', 'RIODescSize', 'RIODescUse',
+    'RIOFdClose', 'RIOFdGetMap', 'RIOFdGetName', 'RIOFdIsDbg',
+    'RIOFdOpen', 'RIOFdRead', 'RIOFdReadAt', 'RIOFdRemap',
+    'RIOFdResize', 'RIOFdSeek', 'RIOFdSize', 'RIOFdWrite',
+    'RIOFdWriteAt', 'RIOIsValidOff', 'RIOMap', 'RIOMapAdd',
+    'RIOMapGet', 'RIOMapGetPaddr', 'RIOOpen', 'RIOOpenAt', 'RIOP2V',
+    'RIOPlugin', 'RIOPtraceFn', 'RIOPtraceFuncFn', 'RIORap',
+    'RIOReadAt', 'RIOSystem', 'RIOUndo', 'RIOUndoWrite', 'RIOUndos',
+    'RIOV2P', 'RIOWriteAt', '__ptrace_request', 'pid_t',
+    'r_io_addr_is_mapped', 'r_io_alprint', 'r_io_bind',
+    'r_io_buffer_close', 'r_io_buffer_load', 'r_io_buffer_read',
+    'r_io_cache_at', 'r_io_cache_commit', 'r_io_cache_fini',
+    'r_io_cache_init', 'r_io_cache_invalidate', 'r_io_cache_list',
+    'r_io_cache_read', 'r_io_cache_reset', 'r_io_cache_write',
+    'r_io_close', 'r_io_close_all', 'r_io_desc_add',
+    'r_io_desc_cache_cleanup', 'r_io_desc_cache_commit',
+    'r_io_desc_cache_fini', 'r_io_desc_cache_fini_all',
+    'r_io_desc_cache_init', 'r_io_desc_cache_list',
+    'r_io_desc_cache_read', 'r_io_desc_cache_write',
+    'r_io_desc_close', 'r_io_desc_del', 'r_io_desc_exchange',
+    'r_io_desc_extend', 'r_io_desc_fini', 'r_io_desc_free',
+    'r_io_desc_get', 'r_io_desc_get_base', 'r_io_desc_get_highest',
+    'r_io_desc_get_lowest', 'r_io_desc_get_next', 'r_io_desc_get_pid',
+    'r_io_desc_get_prev', 'r_io_desc_get_tid', 'r_io_desc_init',
+    'r_io_desc_is_blockdevice', 'r_io_desc_is_chardevice',
+    'r_io_desc_is_dbg', 'r_io_desc_new', 'r_io_desc_open',
+    'r_io_desc_open_plugin', 'r_io_desc_read', 'r_io_desc_read_at',
+    'r_io_desc_resize', 'r_io_desc_seek', 'r_io_desc_size',
+    'r_io_desc_write', 'r_io_desc_write_at', 'r_io_extend_at',
+    'r_io_fd_close', 'r_io_fd_get_base', 'r_io_fd_get_current',
+    'r_io_fd_get_highest', 'r_io_fd_get_lowest', 'r_io_fd_get_name',
+    'r_io_fd_get_next', 'r_io_fd_get_pid', 'r_io_fd_get_prev',
+    'r_io_fd_get_tid', 'r_io_fd_is_blockdevice',
+    'r_io_fd_is_chardevice', 'r_io_fd_is_dbg', 'r_io_fd_open',
+    'r_io_fd_read', 'r_io_fd_read_at', 'r_io_fd_resize',
+    'r_io_fd_seek', 'r_io_fd_size', 'r_io_fd_write',
+    'r_io_fd_write_at', 'r_io_fini', 'r_io_free', 'r_io_init',
+    'r_io_is_listener', 'r_io_is_valid_offset', 'r_io_map_add',
+    'r_io_map_add_batch', 'r_io_map_cleanup', 'r_io_map_del',
+    'r_io_map_del_for_fd', 'r_io_map_del_name', 'r_io_map_depriorize',
+    'r_io_map_exists', 'r_io_map_exists_for_id', 'r_io_map_fini',
+    'r_io_map_get', 'r_io_map_get_at', 'r_io_map_get_by_fd',
+    'r_io_map_get_paddr', 'r_io_map_init', 'r_io_map_is_in_range',
+    'r_io_map_is_mapped', 'r_io_map_location', 'r_io_map_new',
+    'r_io_map_next_address', 'r_io_map_next_available',
+    'r_io_map_priorize', 'r_io_map_priorize_for_fd', 'r_io_map_remap',
+    'r_io_map_remap_fd', 'r_io_map_reset', 'r_io_map_resize',
     'r_io_map_set_name', 'r_io_new', 'r_io_nread_at', 'r_io_open',
     'r_io_open_at', 'r_io_open_buffer', 'r_io_open_many',
     'r_io_open_nomap', 'r_io_p2v', 'r_io_plugin_add',
@@ -1449,8 +1436,8 @@ __all__ = \
     'r_io_wundo_clear', 'r_io_wundo_list', 'r_io_wundo_new',
     'r_io_wundo_set', 'r_io_wundo_set_all', 'r_io_wundo_set_t',
     'r_io_wundo_size', 'r_ptrace_data_t', 'r_ptrace_request_t',
-    'r_ptrace_request_t__enumvalues', 'struct_c__SA_RIODescData',
-    'struct_c__SA_RIORap', 'struct_ht_up_bucket_t', 'struct_ht_up_kv',
+    'r_ptrace_request_t__enumvalues', 'struct_c__SA_RIORap',
+    'struct_ht_up_bucket_t', 'struct_ht_up_kv',
     'struct_ht_up_options_t', 'struct_ht_up_t', 'struct_in_addr',
     'struct_ls_iter_t', 'struct_ls_t',
     'struct_ptrace_wrap_instance_t', 'struct_r_buf_t',

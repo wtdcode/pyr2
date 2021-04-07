@@ -196,10 +196,10 @@ RSyscallPort = struct_r_syscall_port_t
 class struct_r_syscall_t(Structure):
     pass
 
-class struct_sdb_t(Structure):
+class struct__IO_FILE(Structure):
     pass
 
-class struct__IO_FILE(Structure):
+class struct_sdb_t(Structure):
     pass
 
 struct_r_syscall_t._pack_ = 1 # source:False
@@ -218,13 +218,13 @@ struct_r_syscall_t._fields_ = [
     ('PADDING_1', ctypes.c_ubyte * 4),
 ]
 
+class struct__IO_wide_data(Structure):
+    pass
+
 class struct__IO_codecvt(Structure):
     pass
 
 class struct__IO_marker(Structure):
-    pass
-
-class struct__IO_wide_data(Structure):
     pass
 
 struct__IO_FILE._pack_ = 1 # source:False
@@ -262,11 +262,25 @@ struct__IO_FILE._fields_ = [
     ('_unused2', ctypes.c_char * 20),
 ]
 
+class struct_ht_pp_t(Structure):
+    pass
+
 class struct_ls_t(Structure):
     pass
 
-class struct_ht_pp_t(Structure):
+class struct_sdb_gperf_t(Structure):
     pass
+
+class struct_c__SA_dict(Structure):
+    pass
+
+struct_c__SA_dict._pack_ = 1 # source:False
+struct_c__SA_dict._fields_ = [
+    ('table', ctypes.POINTER(ctypes.POINTER(None))),
+    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
+    ('size', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+]
 
 class struct_cdb(Structure):
     pass
@@ -324,17 +338,6 @@ struct_cdb_make._fields_ = [
     ('fd', ctypes.c_int32),
 ]
 
-class struct_c__SA_dict(Structure):
-    pass
-
-struct_c__SA_dict._pack_ = 1 # source:False
-struct_c__SA_dict._fields_ = [
-    ('table', ctypes.POINTER(ctypes.POINTER(None))),
-    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
-    ('size', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-]
-
 class struct_sdb_kv(Structure):
     pass
 
@@ -371,6 +374,7 @@ struct_sdb_t._fields_ = [
     ('ht', ctypes.POINTER(struct_ht_pp_t)),
     ('eod', ctypes.c_uint32),
     ('pos', ctypes.c_uint32),
+    ('gp', ctypes.POINTER(struct_sdb_gperf_t)),
     ('fdump', ctypes.c_int32),
     ('PADDING_0', ctypes.c_ubyte * 4),
     ('ndump', ctypes.POINTER(ctypes.c_char)),
@@ -434,6 +438,13 @@ struct_ht_pp_bucket_t._fields_ = [
     ('arr', ctypes.POINTER(struct_ht_pp_kv)),
     ('count', ctypes.c_uint32),
     ('PADDING_0', ctypes.c_ubyte * 4),
+]
+
+struct_sdb_gperf_t._pack_ = 1 # source:False
+struct_sdb_gperf_t._fields_ = [
+    ('name', ctypes.POINTER(ctypes.c_char)),
+    ('get', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char))),
+    ('hash', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_char))),
 ]
 
 class struct_ls_iter_t(Structure):
@@ -569,5 +580,5 @@ __all__ = \
     'struct_ls_t', 'struct_r_list_iter_t', 'struct_r_list_t',
     'struct_r_syscall_arch_plugin_t', 'struct_r_syscall_args_t',
     'struct_r_syscall_item_t', 'struct_r_syscall_plugin_t',
-    'struct_r_syscall_port_t', 'struct_r_syscall_t', 'struct_sdb_kv',
-    'struct_sdb_t']
+    'struct_r_syscall_port_t', 'struct_r_syscall_t',
+    'struct_sdb_gperf_t', 'struct_sdb_kv', 'struct_sdb_t']

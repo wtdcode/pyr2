@@ -247,6 +247,7 @@ class struct_r_rb_node_t(Structure):
 
 struct_r_rb_node_t._pack_ = 1 # source:False
 struct_r_rb_node_t._fields_ = [
+    ('parent', ctypes.POINTER(struct_r_rb_node_t)),
     ('child', ctypes.POINTER(struct_r_rb_node_t) * 2),
     ('red', ctypes.c_bool),
     ('PADDING_0', ctypes.c_ubyte * 7),
@@ -262,16 +263,16 @@ RFlagItem = struct_r_flag_item_t
 class struct_r_flag_t(Structure):
     pass
 
-class struct_sdb_t(Structure):
-    pass
-
-class struct_r_num_t(Structure):
-    pass
-
 class struct_ht_pp_t(Structure):
     pass
 
+class struct_sdb_t(Structure):
+    pass
+
 class struct_r_skiplist_t(Structure):
+    pass
+
+class struct_r_num_t(Structure):
     pass
 
 class struct_r_spaces_t(Structure):
@@ -301,6 +302,7 @@ struct_r_flag_t._fields_ = [
     ('ht_name', ctypes.POINTER(struct_ht_pp_t)),
     ('cb_printf', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(ctypes.c_char))),
     ('zones', ctypes.POINTER(struct_r_list_t)),
+    ('mask', ctypes.c_uint64),
 ]
 
 class struct_ht_up_t(Structure):
@@ -376,8 +378,40 @@ struct_ht_up_kv._fields_ = [
     ('value_len', ctypes.c_uint32),
 ]
 
+class struct_sdb_gperf_t(Structure):
+    pass
+
 class struct_ls_t(Structure):
     pass
+
+class struct_c__SA_dict(Structure):
+    pass
+
+struct_c__SA_dict._pack_ = 1 # source:False
+struct_c__SA_dict._fields_ = [
+    ('table', ctypes.POINTER(ctypes.POINTER(None))),
+    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
+    ('size', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+]
+
+class struct_cdb(Structure):
+    pass
+
+struct_cdb._pack_ = 1 # source:False
+struct_cdb._fields_ = [
+    ('map', ctypes.POINTER(ctypes.c_char)),
+    ('fd', ctypes.c_int32),
+    ('size', ctypes.c_uint32),
+    ('loop', ctypes.c_uint32),
+    ('khash', ctypes.c_uint32),
+    ('kpos', ctypes.c_uint32),
+    ('hpos', ctypes.c_uint32),
+    ('hslots', ctypes.c_uint32),
+    ('dpos', ctypes.c_uint32),
+    ('dlen', ctypes.c_uint32),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+]
 
 class struct_cdb_make(Structure):
     pass
@@ -417,24 +451,6 @@ struct_cdb_make._fields_ = [
     ('fd', ctypes.c_int32),
 ]
 
-class struct_cdb(Structure):
-    pass
-
-struct_cdb._pack_ = 1 # source:False
-struct_cdb._fields_ = [
-    ('map', ctypes.POINTER(ctypes.c_char)),
-    ('fd', ctypes.c_int32),
-    ('size', ctypes.c_uint32),
-    ('loop', ctypes.c_uint32),
-    ('khash', ctypes.c_uint32),
-    ('kpos', ctypes.c_uint32),
-    ('hpos', ctypes.c_uint32),
-    ('hslots', ctypes.c_uint32),
-    ('dpos', ctypes.c_uint32),
-    ('dlen', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-]
-
 class struct_sdb_kv(Structure):
     pass
 
@@ -457,17 +473,6 @@ struct_sdb_kv._fields_ = [
     ('expire', ctypes.c_uint64),
 ]
 
-class struct_c__SA_dict(Structure):
-    pass
-
-struct_c__SA_dict._pack_ = 1 # source:False
-struct_c__SA_dict._fields_ = [
-    ('table', ctypes.POINTER(ctypes.POINTER(None))),
-    ('f', ctypes.CFUNCTYPE(None, ctypes.POINTER(None))),
-    ('size', ctypes.c_uint32),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-]
-
 struct_sdb_t._pack_ = 1 # source:False
 struct_sdb_t._fields_ = [
     ('dir', ctypes.POINTER(ctypes.c_char)),
@@ -482,6 +487,7 @@ struct_sdb_t._fields_ = [
     ('ht', ctypes.POINTER(struct_ht_pp_t)),
     ('eod', ctypes.c_uint32),
     ('pos', ctypes.c_uint32),
+    ('gp', ctypes.POINTER(struct_sdb_gperf_t)),
     ('fdump', ctypes.c_int32),
     ('PADDING_0', ctypes.c_ubyte * 4),
     ('ndump', ctypes.POINTER(ctypes.c_char)),
@@ -547,6 +553,13 @@ struct_ht_pp_bucket_t._fields_ = [
     ('PADDING_0', ctypes.c_ubyte * 4),
 ]
 
+struct_sdb_gperf_t._pack_ = 1 # source:False
+struct_sdb_gperf_t._fields_ = [
+    ('name', ctypes.POINTER(ctypes.c_char)),
+    ('get', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_char), ctypes.POINTER(ctypes.c_char))),
+    ('hash', ctypes.CFUNCTYPE(ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_char))),
+]
+
 class struct_ls_iter_t(Structure):
     pass
 
@@ -570,15 +583,6 @@ struct_ls_iter_t._fields_ = [
 
 class struct_r_num_calc_t(Structure):
     pass
-
-class struct_c__SA_RNumCalcValue(Structure):
-    pass
-
-struct_c__SA_RNumCalcValue._pack_ = 1 # source:False
-struct_c__SA_RNumCalcValue._fields_ = [
-    ('d', ctypes.c_double),
-    ('n', ctypes.c_uint64),
-]
 
 
 # values for enumeration 'c__EA_RNumCalcToken'
@@ -629,6 +633,15 @@ RNCSHR = 62
 RNCROL = 35
 RNCROR = 36
 c__EA_RNumCalcToken = ctypes.c_uint32 # enum
+class struct_c__SA_RNumCalcValue(Structure):
+    pass
+
+struct_c__SA_RNumCalcValue._pack_ = 1 # source:False
+struct_c__SA_RNumCalcValue._fields_ = [
+    ('d', ctypes.c_double),
+    ('n', ctypes.c_uint64),
+]
+
 struct_r_num_calc_t._pack_ = 1 # source:False
 struct_r_num_calc_t._fields_ = [
     ('curr_tok', c__EA_RNumCalcToken),
@@ -927,4 +940,4 @@ __all__ = \
     'struct_r_num_t', 'struct_r_rb_node_t',
     'struct_r_skiplist_node_t', 'struct_r_skiplist_t',
     'struct_r_space_t', 'struct_r_spaces_t', 'struct_r_vector_t',
-    'struct_sdb_kv', 'struct_sdb_t']
+    'struct_sdb_gperf_t', 'struct_sdb_kv', 'struct_sdb_t']
