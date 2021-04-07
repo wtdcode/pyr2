@@ -682,10 +682,10 @@ class struct_sdb_t(Structure):
 class struct_r_tree_t(Structure):
     pass
 
-class struct_r_event_t(Structure):
+class struct_r_anal_t(Structure):
     pass
 
-class struct_r_anal_t(Structure):
+class struct_r_event_t(Structure):
     pass
 
 class struct_r_egg_t(Structure):
@@ -1432,6 +1432,12 @@ class struct_r_anal_plugin_t(Structure):
 class struct_r_anal_esil_t(Structure):
     pass
 
+class struct_r_flag_item_t(Structure):
+    pass
+
+class struct_r_flag_t(Structure):
+    pass
+
 class struct_r_anal_hint_cb_t(Structure):
     pass
 
@@ -1439,12 +1445,6 @@ struct_r_anal_hint_cb_t._pack_ = 1 # source:False
 struct_r_anal_hint_cb_t._fields_ = [
     ('on_bits', ctypes.CFUNCTYPE(None, ctypes.POINTER(struct_r_anal_t), ctypes.c_uint64, ctypes.c_int32, ctypes.c_bool)),
 ]
-
-class struct_r_flag_item_t(Structure):
-    pass
-
-class struct_r_flag_t(Structure):
-    pass
 
 class struct_r_str_constpool_t(Structure):
     pass
