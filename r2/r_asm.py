@@ -1182,13 +1182,13 @@ struct_r_queue_t._fields_ = [
     ('size', ctypes.c_uint32),
 ]
 
+class struct_ptrace_wrap_instance_t(Structure):
+    pass
+
 class struct_r_event_t(Structure):
     pass
 
 class struct_r_cache_t(Structure):
-    pass
-
-class struct_ptrace_wrap_instance_t(Structure):
     pass
 
 class struct_r_io_undo_t(Structure):
