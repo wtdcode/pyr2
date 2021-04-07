@@ -133,10 +133,10 @@ def build_radare2():
     PREFIX = os.getenv("R2PREFIX", str(Path(ROOT_DIR) / "radare2" / "pyr2installdir"))
     # Special environment variable to indicate whether we are generating bindings.
     BINDING = os.getenv("BINDING", "")
-    if sys.platform == "win32":
-        BACKEND = os.getenv("BACKEND", "vs2019")
-    else:
-        BACKEND = os.getenv("BACKEND", "ninja")
+    # if sys.platform == "win32":
+    #     BACKEND = os.getenv("BACKEND", "vs2019")
+    # else:
+    BACKEND = os.getenv("BACKEND", "ninja")
 
     args = []
     if sys.platform == "win32":
