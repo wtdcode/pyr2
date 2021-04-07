@@ -486,19 +486,19 @@ struct_r_core_tasks_t._fields_ = [
     ('PADDING_2', ctypes.c_ubyte * 3),
 ]
 
-class struct_r_th_t(Structure):
+class struct_r_cons_context_t(Structure):
     pass
 
-class struct_r_cons_context_t(Structure):
+class struct_r_th_t(Structure):
     pass
 
 class struct_r_th_cond_t(Structure):
     pass
 
-class struct_r_th_sem_t(Structure):
+class struct_r_core_t(Structure):
     pass
 
-class struct_r_core_t(Structure):
+class struct_r_th_sem_t(Structure):
     pass
 
 
@@ -561,6 +561,9 @@ class struct_r_anal_t(Structure):
 class struct_r_panels_root_t(Structure):
     pass
 
+class struct_c__SA_RTable(Structure):
+    pass
+
 class struct_r_fs_shell_t(Structure):
     pass
 
@@ -577,9 +580,6 @@ class struct_r_lang_t(Structure):
     pass
 
 class struct_r_debug_t(Structure):
-    pass
-
-class struct_c__SA_RTable(Structure):
     pass
 
 class struct_r_flag_t(Structure):
