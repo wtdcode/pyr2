@@ -576,9 +576,6 @@ class struct_r_config_t(Structure):
 class struct_r_lang_t(Structure):
     pass
 
-class struct_c__SA_RTable(Structure):
-    pass
-
 class struct_r_debug_t(Structure):
     pass
 
@@ -619,6 +616,9 @@ class struct_r_cmd_t(Structure):
     pass
 
 class struct_r_egg_t(Structure):
+    pass
+
+class struct_c__SA_RTable(Structure):
     pass
 
 class struct_r_event_t(Structure):
@@ -4372,6 +4372,9 @@ struct_r_fs_shell_t._fields_ = [
     ('hist_add', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(ctypes.c_char))),
 ]
 
+class struct_r_ascii_node_t(Structure):
+    pass
+
 class struct_r_graph_t(Structure):
     pass
 
@@ -4382,9 +4385,6 @@ class struct_layer_t(Structure):
     pass
 
 class struct_r_graph_node_t(Structure):
-    pass
-
-class struct_r_ascii_node_t(Structure):
     pass
 
 class struct_r_core_graph_hits_t(Structure):

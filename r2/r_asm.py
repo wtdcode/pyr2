@@ -320,9 +320,6 @@ class struct_r_parse_t(Structure):
 class struct_r_num_t(Structure):
     pass
 
-class struct_ht_pp_t(Structure):
-    pass
-
 class struct_r_asm_plugin_t(Structure):
     pass
 
@@ -330,6 +327,9 @@ class struct_sdb_t(Structure):
     pass
 
 class struct_r_syscall_t(Structure):
+    pass
+
+class struct_ht_pp_t(Structure):
     pass
 
 class struct_r_bin_bind_t(Structure):
