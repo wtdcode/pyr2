@@ -245,10 +245,10 @@ RIOUndoWrite = struct_r_io_undo_w_t
 class struct_r_io_t(Structure):
     pass
 
-class struct_r_id_pool_t(Structure):
+class struct_ls_t(Structure):
     pass
 
-class struct_ls_t(Structure):
+class struct_r_id_pool_t(Structure):
     pass
 
 class struct_r_event_t(Structure):

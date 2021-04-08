@@ -255,15 +255,6 @@ struct_c__SA_RBinDwarfDie._fields_ = [
 class union_dwarf_attr_kind_0(Union):
     pass
 
-class struct_c__SA_RBinDwarfBlock(Structure):
-    pass
-
-struct_c__SA_RBinDwarfBlock._pack_ = 1 # source:False
-struct_c__SA_RBinDwarfBlock._fields_ = [
-    ('length', ctypes.c_uint64),
-    ('data', ctypes.POINTER(ctypes.c_ubyte)),
-]
-
 class struct_dwarf_attr_kind_0_0(Structure):
     pass
 
@@ -271,6 +262,15 @@ struct_dwarf_attr_kind_0_0._pack_ = 1 # source:False
 struct_dwarf_attr_kind_0_0._fields_ = [
     ('content', ctypes.POINTER(ctypes.c_char)),
     ('offset', ctypes.c_uint64),
+]
+
+class struct_c__SA_RBinDwarfBlock(Structure):
+    pass
+
+struct_c__SA_RBinDwarfBlock._pack_ = 1 # source:False
+struct_c__SA_RBinDwarfBlock._fields_ = [
+    ('length', ctypes.c_uint64),
+    ('data', ctypes.POINTER(ctypes.c_ubyte)),
 ]
 
 union_dwarf_attr_kind_0._pack_ = 1 # source:False
@@ -2115,19 +2115,6 @@ R_ANAL_COND_VC = 13
 R_ANAL_COND_HI = 14
 R_ANAL_COND_LS = 15
 c__EA__RAnalCond = ctypes.c_uint32 # enum
-class struct_c__SA_RStrBuf(Structure):
-    pass
-
-struct_c__SA_RStrBuf._pack_ = 1 # source:False
-struct_c__SA_RStrBuf._fields_ = [
-    ('buf', ctypes.c_char * 32),
-    ('len', ctypes.c_uint64),
-    ('ptr', ctypes.POINTER(ctypes.c_char)),
-    ('ptrlen', ctypes.c_uint64),
-    ('weakref', ctypes.c_bool),
-    ('PADDING_0', ctypes.c_ubyte * 7),
-]
-
 
 # values for enumeration 'c__EA_RAnalOpPrefix'
 c__EA_RAnalOpPrefix__enumvalues = {
@@ -2145,6 +2132,19 @@ R_ANAL_OP_PREFIX_LOCK = 8
 R_ANAL_OP_PREFIX_LIKELY = 16
 R_ANAL_OP_PREFIX_UNLIKELY = 32
 c__EA_RAnalOpPrefix = ctypes.c_uint32 # enum
+class struct_c__SA_RStrBuf(Structure):
+    pass
+
+struct_c__SA_RStrBuf._pack_ = 1 # source:False
+struct_c__SA_RStrBuf._fields_ = [
+    ('buf', ctypes.c_char * 32),
+    ('len', ctypes.c_uint64),
+    ('ptr', ctypes.POINTER(ctypes.c_char)),
+    ('ptrlen', ctypes.c_uint64),
+    ('weakref', ctypes.c_bool),
+    ('PADDING_0', ctypes.c_ubyte * 7),
+]
+
 
 # values for enumeration 'c__EA_RAnalOpFamily'
 c__EA_RAnalOpFamily__enumvalues = {
