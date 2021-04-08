@@ -255,15 +255,6 @@ struct_c__SA_RBinDwarfDie._fields_ = [
 class union_dwarf_attr_kind_0(Union):
     pass
 
-class struct_dwarf_attr_kind_0_0(Structure):
-    pass
-
-struct_dwarf_attr_kind_0_0._pack_ = 1 # source:False
-struct_dwarf_attr_kind_0_0._fields_ = [
-    ('content', ctypes.POINTER(ctypes.c_char)),
-    ('offset', ctypes.c_uint64),
-]
-
 class struct_c__SA_RBinDwarfBlock(Structure):
     pass
 
@@ -271,6 +262,15 @@ struct_c__SA_RBinDwarfBlock._pack_ = 1 # source:False
 struct_c__SA_RBinDwarfBlock._fields_ = [
     ('length', ctypes.c_uint64),
     ('data', ctypes.POINTER(ctypes.c_ubyte)),
+]
+
+class struct_dwarf_attr_kind_0_0(Structure):
+    pass
+
+struct_dwarf_attr_kind_0_0._pack_ = 1 # source:False
+struct_dwarf_attr_kind_0_0._fields_ = [
+    ('content', ctypes.POINTER(ctypes.c_char)),
+    ('offset', ctypes.c_uint64),
 ]
 
 union_dwarf_attr_kind_0._pack_ = 1 # source:False
