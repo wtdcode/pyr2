@@ -585,9 +585,6 @@ class struct_r_flag_t(Structure):
 class struct_r_fs_t(Structure):
     pass
 
-class struct_c__SA_RTable(Structure):
-    pass
-
 class struct_r_buf_t(Structure):
     pass
 
@@ -622,6 +619,9 @@ class struct_r_egg_t(Structure):
     pass
 
 class struct_r_event_t(Structure):
+    pass
+
+class struct_c__SA_RTable(Structure):
     pass
 
 class struct_r_core_project_t(Structure):
