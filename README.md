@@ -1,5 +1,7 @@
 ## pyr2
 
+Moved to [here](https://github.com/radareorg/radare2-bindings/r2api).
+
 Yet another radare2 python bindings.
 
 Compared to [radare2-bindings](https://github.com/radareorg/radare2-bindings) and [radare2-r2pipe](https://github.com/radareorg/radare2-r2pipe), this binding:
