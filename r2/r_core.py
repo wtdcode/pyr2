@@ -570,6 +570,9 @@ class struct_r_search_t(Structure):
 class struct_r_bin_t(Structure):
     pass
 
+class struct_c__SA_RTable(Structure):
+    pass
+
 class struct_r_config_t(Structure):
     pass
 
@@ -580,9 +583,6 @@ class struct_r_debug_t(Structure):
     pass
 
 class struct_r_flag_t(Structure):
-    pass
-
-class struct_c__SA_RTable(Structure):
     pass
 
 class struct_r_fs_t(Structure):
