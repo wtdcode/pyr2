@@ -49,9 +49,7 @@ jobs:
       run: git status | grep -q "changes"  && git add -u && git commit -m "Bindings generated on `date`"
 
     - name: Push new bindings
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.BINDINGS_DEPLOY_KEY }}
+      run: mkdir -p ~/.ssh && echo ${{ secrets.BINDINGS_DEPLOY_KEY }} > ~/.ssh/id_rsa && ssh-keyscan github.com >> ~/.ssh/known_hosts && git remote add orig git@github.com:wtdcode/pyr2.git && git push orig
   
   test:
     needs: [generate]
