@@ -1,59 +1,14 @@
-# Modified from https://github.com/unicorn-engine/unicorn/blob/198e432a1d7edbed6f4726acc42c50c3a4141b6b/.github/workflows/python-publish.yml
-
 name: PyPI 📦 Distribution
 
-on: [push]
+on:
+  push:
+    tags:
+      - "*"
 
 jobs:
-  generate:
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Set up system path for python libs.
-      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Set up python and libclang.
-      run: sudo apt update && sudo apt install python3 python3-pip libclang-11-dev -y
-    
-    - name: Set up (a specific version) ctypeslib.
-      run: python3 -m pip install https://github.com/trolldbois/ctypeslib/archive/15dd04bec1a7eb28ed93e5954d304a4558f0300e.zip
-    
-    - name: Checkout the repo.
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
-    
-    - name: Setup Ninja
-      uses: seanmiddleditch/gha-setup-ninja@master
-
-    - name: Install meson
-      run: python3 -m pip install setuptools wheel meson
-    
-    - name: Clone latest radare2
-      run: git clone https://github.com/radareorg/radare2
-
-    - name: Build radare2
-      run: env BINDING=1 python3 setup.py build
-    
-    - name: Generate bindings
-      run: cd tools && python3 gen.py -O ../r2/ -B ../radare2/pyr2installdir/ && cd ..
-
-    - name: Test bindings
-      run: python3 -m pip install -e . && cd tests && python3 test_rapi.py
-    
-    - name: Set up git.
-      run: git config --global user.email mio@lazym.io && git config --global user.name action
-
-    - name: Commit new bindings
-      run: git status | grep -q "changes"  && git add -u && git commit -m "Bindings generated on `date`"
-
-    - name: Push new bindings
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.BINDINGS_DEPLOY_KEY }}
-  
   build:
-    needs: [generate]
     runs-on: ${{ matrix.os }}
+    if: startsWith(github.ref, 'refs/tags')
     strategy:
       fail-fast: false
       matrix:
