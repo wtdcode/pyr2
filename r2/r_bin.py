@@ -178,16 +178,16 @@ _libraries['FIXME_STUB'] = FunctionFactoryStub() #  ctypes.CDLL('FIXME_STUB')
 class struct_r_bin_t(Structure):
     pass
 
-class struct_r_list_t(Structure):
+class struct_r_id_storage_t(Structure):
     pass
 
-class struct_sdb_t(Structure):
+class struct_r_list_t(Structure):
     pass
 
 class struct_r_bin_file_t(Structure):
     pass
 
-class struct_r_id_storage_t(Structure):
+class struct_sdb_t(Structure):
     pass
 
 class struct_r_io_bind_t(Structure):
