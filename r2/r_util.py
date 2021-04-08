@@ -4801,6 +4801,90 @@ r_print_json_human.argtypes = [ctypes.POINTER(ctypes.c_char)]
 r_print_json_path = _libr_util.r_print_json_path
 r_print_json_path.restype = ctypes.POINTER(ctypes.c_char)
 r_print_json_path.argtypes = [ctypes.POINTER(ctypes.c_char), ctypes.c_int32]
+
+# values for enumeration 'r_json_type_t'
+r_json_type_t__enumvalues = {
+    0: 'R_JSON_NULL',
+    1: 'R_JSON_OBJECT',
+    2: 'R_JSON_ARRAY',
+    3: 'R_JSON_STRING',
+    4: 'R_JSON_INTEGER',
+    5: 'R_JSON_DOUBLE',
+    6: 'R_JSON_BOOLEAN',
+}
+R_JSON_NULL = 0
+R_JSON_OBJECT = 1
+R_JSON_ARRAY = 2
+R_JSON_STRING = 3
+R_JSON_INTEGER = 4
+R_JSON_DOUBLE = 5
+R_JSON_BOOLEAN = 6
+r_json_type_t = ctypes.c_uint32 # enum
+RJsonType = r_json_type_t
+RJsonType__enumvalues = r_json_type_t__enumvalues
+class struct_r_json_t(Structure):
+    pass
+
+class union_r_json_t_0(Union):
+    pass
+
+class struct_r_json_t_0_1(Structure):
+    pass
+
+struct_r_json_t_0_1._pack_ = 1 # source:False
+struct_r_json_t_0_1._fields_ = [
+    ('count', ctypes.c_uint64),
+    ('first', ctypes.POINTER(struct_r_json_t)),
+    ('last', ctypes.POINTER(struct_r_json_t)),
+]
+
+class struct_r_json_t_0_0(Structure):
+    pass
+
+class union_r_json_t_0_0_0(Union):
+    pass
+
+union_r_json_t_0_0_0._pack_ = 1 # source:False
+union_r_json_t_0_0_0._fields_ = [
+    ('u_value', ctypes.c_uint64),
+    ('s_value', ctypes.c_int64),
+]
+
+struct_r_json_t_0_0._pack_ = 1 # source:False
+struct_r_json_t_0_0._fields_ = [
+    ('r_json_t_0_0_0', union_r_json_t_0_0_0),
+    ('dbl_value', ctypes.c_double),
+]
+
+union_r_json_t_0._pack_ = 1 # source:False
+union_r_json_t_0._fields_ = [
+    ('str_value', ctypes.POINTER(ctypes.c_char)),
+    ('num', struct_r_json_t_0_0),
+    ('children', struct_r_json_t_0_1),
+]
+
+struct_r_json_t._pack_ = 1 # source:False
+struct_r_json_t._fields_ = [
+    ('type', RJsonType),
+    ('PADDING_0', ctypes.c_ubyte * 4),
+    ('key', ctypes.POINTER(ctypes.c_char)),
+    ('r_json_t_0', union_r_json_t_0),
+    ('next', ctypes.POINTER(struct_r_json_t)),
+]
+
+RJson = struct_r_json_t
+r_json_parse = _libr_util.r_json_parse
+r_json_parse.restype = ctypes.POINTER(struct_r_json_t)
+r_json_parse.argtypes = [ctypes.POINTER(ctypes.c_char)]
+r_json_free = _libr_util.r_json_free
+r_json_free.restype = None
+r_json_free.argtypes = [ctypes.POINTER(struct_r_json_t)]
+r_json_get = _libr_util.r_json_get
+r_json_get.restype = ctypes.POINTER(struct_r_json_t)
+r_json_get.argtypes = [ctypes.POINTER(struct_r_json_t), ctypes.POINTER(ctypes.c_char)]
+r_json_item = _libr_util.r_json_item
+r_json_item.restype = ctypes.POINTER(struct_r_json_t)
+r_json_item.argtypes = [ctypes.POINTER(struct_r_json_t), size_t]
 class struct_r_anal_graph_node_info_t(Structure):
     pass
 
@@ -4853,90 +4937,6 @@ r_graph_drawable_to_dot.argtypes = [ctypes.POINTER(struct_r_graph_t), ctypes.POI
 r_graph_drawable_to_json = _libr_util.r_graph_drawable_to_json
 r_graph_drawable_to_json.restype = None
 r_graph_drawable_to_json.argtypes = [ctypes.POINTER(struct_r_graph_t), ctypes.POINTER(struct_pj_t), ctypes.c_bool]
-
-# values for enumeration 'r_json_type_t'
-r_json_type_t__enumvalues = {
-    0: 'R_JSON_NULL',
-    1: 'R_JSON_OBJECT',
-    2: 'R_JSON_ARRAY',
-    3: 'R_JSON_STRING',
-    4: 'R_JSON_INTEGER',
-    5: 'R_JSON_DOUBLE',
-    6: 'R_JSON_BOOLEAN',
-}
-R_JSON_NULL = 0
-R_JSON_OBJECT = 1
-R_JSON_ARRAY = 2
-R_JSON_STRING = 3
-R_JSON_INTEGER = 4
-R_JSON_DOUBLE = 5
-R_JSON_BOOLEAN = 6
-r_json_type_t = ctypes.c_uint32 # enum
-RJsonType = r_json_type_t
-RJsonType__enumvalues = r_json_type_t__enumvalues
-class struct_r_json_t(Structure):
-    pass
-
-class union_r_json_t_0(Union):
-    pass
-
-class struct_r_json_t_0_0(Structure):
-    pass
-
-class union_r_json_t_0_0_0(Union):
-    pass
-
-union_r_json_t_0_0_0._pack_ = 1 # source:False
-union_r_json_t_0_0_0._fields_ = [
-    ('u_value', ctypes.c_uint64),
-    ('s_value', ctypes.c_int64),
-]
-
-struct_r_json_t_0_0._pack_ = 1 # source:False
-struct_r_json_t_0_0._fields_ = [
-    ('r_json_t_0_0_0', union_r_json_t_0_0_0),
-    ('dbl_value', ctypes.c_double),
-]
-
-class struct_r_json_t_0_1(Structure):
-    pass
-
-struct_r_json_t_0_1._pack_ = 1 # source:False
-struct_r_json_t_0_1._fields_ = [
-    ('count', ctypes.c_uint64),
-    ('first', ctypes.POINTER(struct_r_json_t)),
-    ('last', ctypes.POINTER(struct_r_json_t)),
-]
-
-union_r_json_t_0._pack_ = 1 # source:False
-union_r_json_t_0._fields_ = [
-    ('str_value', ctypes.POINTER(ctypes.c_char)),
-    ('num', struct_r_json_t_0_0),
-    ('children', struct_r_json_t_0_1),
-]
-
-struct_r_json_t._pack_ = 1 # source:False
-struct_r_json_t._fields_ = [
-    ('type', RJsonType),
-    ('PADDING_0', ctypes.c_ubyte * 4),
-    ('key', ctypes.POINTER(ctypes.c_char)),
-    ('r_json_t_0', union_r_json_t_0),
-    ('next', ctypes.POINTER(struct_r_json_t)),
-]
-
-RJson = struct_r_json_t
-r_json_parse = _libr_util.r_json_parse
-r_json_parse.restype = ctypes.POINTER(struct_r_json_t)
-r_json_parse.argtypes = [ctypes.POINTER(ctypes.c_char)]
-r_json_free = _libr_util.r_json_free
-r_json_free.restype = None
-r_json_free.argtypes = [ctypes.POINTER(struct_r_json_t)]
-r_json_get = _libr_util.r_json_get
-r_json_get.restype = ctypes.POINTER(struct_r_json_t)
-r_json_get.argtypes = [ctypes.POINTER(struct_r_json_t), ctypes.POINTER(ctypes.c_char)]
-r_json_item = _libr_util.r_json_item
-r_json_item.restype = ctypes.POINTER(struct_r_json_t)
-r_json_item.argtypes = [ctypes.POINTER(struct_r_json_t), size_t]
 r_util_version = _libr_util.r_util_version
 r_util_version.restype = ctypes.POINTER(ctypes.c_char)
 r_util_version.argtypes = []
