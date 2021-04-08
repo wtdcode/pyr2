@@ -558,6 +558,9 @@ class struct_r_parse_t(Structure):
 class struct_r_anal_t(Structure):
     pass
 
+class struct_c__SA_RTable(Structure):
+    pass
+
 class struct_r_panels_root_t(Structure):
     pass
 
@@ -616,9 +619,6 @@ class struct_r_cmd_t(Structure):
     pass
 
 class struct_r_egg_t(Structure):
-    pass
-
-class struct_c__SA_RTable(Structure):
     pass
 
 class struct_r_event_t(Structure):
