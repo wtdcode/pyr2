@@ -682,10 +682,10 @@ class struct_sdb_t(Structure):
 class struct_r_tree_t(Structure):
     pass
 
-class struct_r_event_t(Structure):
+class struct_r_anal_t(Structure):
     pass
 
-class struct_r_anal_t(Structure):
+class struct_r_event_t(Structure):
     pass
 
 class struct_r_egg_t(Structure):
