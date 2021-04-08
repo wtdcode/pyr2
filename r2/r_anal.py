@@ -255,15 +255,6 @@ struct_c__SA_RBinDwarfDie._fields_ = [
 class union_dwarf_attr_kind_0(Union):
     pass
 
-class struct_c__SA_RBinDwarfBlock(Structure):
-    pass
-
-struct_c__SA_RBinDwarfBlock._pack_ = 1 # source:False
-struct_c__SA_RBinDwarfBlock._fields_ = [
-    ('length', ctypes.c_uint64),
-    ('data', ctypes.POINTER(ctypes.c_ubyte)),
-]
-
 class struct_dwarf_attr_kind_0_0(Structure):
     pass
 
@@ -271,6 +262,15 @@ struct_dwarf_attr_kind_0_0._pack_ = 1 # source:False
 struct_dwarf_attr_kind_0_0._fields_ = [
     ('content', ctypes.POINTER(ctypes.c_char)),
     ('offset', ctypes.c_uint64),
+]
+
+class struct_c__SA_RBinDwarfBlock(Structure):
+    pass
+
+struct_c__SA_RBinDwarfBlock._pack_ = 1 # source:False
+struct_c__SA_RBinDwarfBlock._fields_ = [
+    ('length', ctypes.c_uint64),
+    ('data', ctypes.POINTER(ctypes.c_ubyte)),
 ]
 
 union_dwarf_attr_kind_0._pack_ = 1 # source:False
@@ -2066,23 +2066,6 @@ R_ANAL_STACK_RESET = 5
 R_ANAL_STACK_ALIGN = 6
 c__EA_RAnalStackOp = ctypes.c_uint32 # enum
 
-# values for enumeration 'c__EA_RAnalOpPrefix'
-c__EA_RAnalOpPrefix__enumvalues = {
-    1: 'R_ANAL_OP_PREFIX_COND',
-    2: 'R_ANAL_OP_PREFIX_REP',
-    4: 'R_ANAL_OP_PREFIX_REPNE',
-    8: 'R_ANAL_OP_PREFIX_LOCK',
-    16: 'R_ANAL_OP_PREFIX_LIKELY',
-    32: 'R_ANAL_OP_PREFIX_UNLIKELY',
-}
-R_ANAL_OP_PREFIX_COND = 1
-R_ANAL_OP_PREFIX_REP = 2
-R_ANAL_OP_PREFIX_REPNE = 4
-R_ANAL_OP_PREFIX_LOCK = 8
-R_ANAL_OP_PREFIX_LIKELY = 16
-R_ANAL_OP_PREFIX_UNLIKELY = 32
-c__EA_RAnalOpPrefix = ctypes.c_uint32 # enum
-
 # values for enumeration 'c__EA_RAnalOpDirection'
 c__EA_RAnalOpDirection__enumvalues = {
     1: 'R_ANAL_OP_DIR_READ',
@@ -2132,6 +2115,23 @@ R_ANAL_COND_VC = 13
 R_ANAL_COND_HI = 14
 R_ANAL_COND_LS = 15
 c__EA__RAnalCond = ctypes.c_uint32 # enum
+
+# values for enumeration 'c__EA_RAnalOpPrefix'
+c__EA_RAnalOpPrefix__enumvalues = {
+    1: 'R_ANAL_OP_PREFIX_COND',
+    2: 'R_ANAL_OP_PREFIX_REP',
+    4: 'R_ANAL_OP_PREFIX_REPNE',
+    8: 'R_ANAL_OP_PREFIX_LOCK',
+    16: 'R_ANAL_OP_PREFIX_LIKELY',
+    32: 'R_ANAL_OP_PREFIX_UNLIKELY',
+}
+R_ANAL_OP_PREFIX_COND = 1
+R_ANAL_OP_PREFIX_REP = 2
+R_ANAL_OP_PREFIX_REPNE = 4
+R_ANAL_OP_PREFIX_LOCK = 8
+R_ANAL_OP_PREFIX_LIKELY = 16
+R_ANAL_OP_PREFIX_UNLIKELY = 32
+c__EA_RAnalOpPrefix = ctypes.c_uint32 # enum
 class struct_c__SA_RStrBuf(Structure):
     pass
 
