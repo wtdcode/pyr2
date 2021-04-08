@@ -846,10 +846,10 @@ struct_r_debug_t._fields_ = [
     ('glibc_version', ctypes.c_int32),
 ]
 
-class struct_ls_t(Structure):
+class struct_sdb_gperf_t(Structure):
     pass
 
-class struct_sdb_gperf_t(Structure):
+class struct_ls_t(Structure):
     pass
 
 class struct_cdb(Structure):

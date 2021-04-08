@@ -579,13 +579,13 @@ class struct_r_lang_t(Structure):
 class struct_r_debug_t(Structure):
     pass
 
-class struct_c__SA_RTable(Structure):
-    pass
-
 class struct_r_flag_t(Structure):
     pass
 
 class struct_r_fs_t(Structure):
+    pass
+
+class struct_c__SA_RTable(Structure):
     pass
 
 class struct_r_buf_t(Structure):
