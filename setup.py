@@ -227,7 +227,7 @@ with open(Path(ROOT_DIR) / "README.md", "r+") as f:
 
 setuptools.setup(
     name="pyr2",
-    version="1.2.0",
+    version="2.0.0",
     author="mio",
     author_email="mio@lazym.io",
     description="Yet anohter radare2 python bindings.",
