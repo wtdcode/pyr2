@@ -2,8 +2,10 @@ name: Generate Bindings and Run tests 🚀
 
 on:
   push:
-     branches:
-       - "*"
+    paths-ignore:
+      - "r2/**"
+    branches:
+      - "*"
 
 jobs:
   generate:
