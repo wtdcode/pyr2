@@ -682,10 +682,10 @@ class struct_sdb_t(Structure):
 class struct_r_tree_t(Structure):
     pass
 
-class struct_r_event_t(Structure):
+class struct_r_anal_t(Structure):
     pass
 
-class struct_r_anal_t(Structure):
+class struct_r_event_t(Structure):
     pass
 
 class struct_r_egg_t(Structure):
@@ -846,10 +846,10 @@ struct_r_debug_t._fields_ = [
     ('glibc_version', ctypes.c_int32),
 ]
 
-class struct_sdb_gperf_t(Structure):
+class struct_ls_t(Structure):
     pass
 
-class struct_ls_t(Structure):
+class struct_sdb_gperf_t(Structure):
     pass
 
 class struct_cdb(Structure):
@@ -1432,6 +1432,12 @@ class struct_r_anal_plugin_t(Structure):
 class struct_r_anal_esil_t(Structure):
     pass
 
+class struct_r_flag_item_t(Structure):
+    pass
+
+class struct_r_flag_t(Structure):
+    pass
+
 class struct_r_anal_hint_cb_t(Structure):
     pass
 
@@ -1504,12 +1510,6 @@ struct_r_anal_callbacks_t._fields_ = [
     ('on_fcn_rename', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t), ctypes.POINTER(ctypes.c_char))),
     ('on_fcn_bb_new', ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.POINTER(struct_r_anal_t), ctypes.POINTER(None), ctypes.POINTER(struct_r_anal_function_t), ctypes.POINTER(struct_r_anal_bb_t))),
 ]
-
-class struct_r_flag_item_t(Structure):
-    pass
-
-class struct_r_flag_t(Structure):
-    pass
 
 class struct_r_interval_tree_t(Structure):
     pass
