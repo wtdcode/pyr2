@@ -489,7 +489,7 @@ struct_r_core_tasks_t._fields_ = [
 class struct_r_th_t(Structure):
     pass
 
-class struct_r_cons_context_t(Structure):
+class struct_r_core_t(Structure):
     pass
 
 class struct_r_th_cond_t(Structure):
@@ -498,7 +498,7 @@ class struct_r_th_cond_t(Structure):
 class struct_r_th_sem_t(Structure):
     pass
 
-class struct_r_core_t(Structure):
+class struct_r_cons_context_t(Structure):
     pass
 
 
@@ -570,9 +570,6 @@ class struct_r_search_t(Structure):
 class struct_r_bin_t(Structure):
     pass
 
-class struct_c__SA_RTable(Structure):
-    pass
-
 class struct_r_config_t(Structure):
     pass
 
@@ -619,6 +616,9 @@ class struct_r_cmd_t(Structure):
     pass
 
 class struct_r_egg_t(Structure):
+    pass
+
+class struct_c__SA_RTable(Structure):
     pass
 
 class struct_r_event_t(Structure):
