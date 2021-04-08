@@ -255,15 +255,6 @@ struct_c__SA_RBinDwarfDie._fields_ = [
 class union_dwarf_attr_kind_0(Union):
     pass
 
-class struct_dwarf_attr_kind_0_0(Structure):
-    pass
-
-struct_dwarf_attr_kind_0_0._pack_ = 1 # source:False
-struct_dwarf_attr_kind_0_0._fields_ = [
-    ('content', ctypes.POINTER(ctypes.c_char)),
-    ('offset', ctypes.c_uint64),
-]
-
 class struct_c__SA_RBinDwarfBlock(Structure):
     pass
 
@@ -271,6 +262,15 @@ struct_c__SA_RBinDwarfBlock._pack_ = 1 # source:False
 struct_c__SA_RBinDwarfBlock._fields_ = [
     ('length', ctypes.c_uint64),
     ('data', ctypes.POINTER(ctypes.c_ubyte)),
+]
+
+class struct_dwarf_attr_kind_0_0(Structure):
+    pass
+
+struct_dwarf_attr_kind_0_0._pack_ = 1 # source:False
+struct_dwarf_attr_kind_0_0._fields_ = [
+    ('content', ctypes.POINTER(ctypes.c_char)),
+    ('offset', ctypes.c_uint64),
 ]
 
 union_dwarf_attr_kind_0._pack_ = 1 # source:False
@@ -2022,6 +2022,23 @@ class struct_r_anal_value_t(Structure):
     pass
 
 
+# values for enumeration 'c__EA_RAnalOpPrefix'
+c__EA_RAnalOpPrefix__enumvalues = {
+    1: 'R_ANAL_OP_PREFIX_COND',
+    2: 'R_ANAL_OP_PREFIX_REP',
+    4: 'R_ANAL_OP_PREFIX_REPNE',
+    8: 'R_ANAL_OP_PREFIX_LOCK',
+    16: 'R_ANAL_OP_PREFIX_LIKELY',
+    32: 'R_ANAL_OP_PREFIX_UNLIKELY',
+}
+R_ANAL_OP_PREFIX_COND = 1
+R_ANAL_OP_PREFIX_REP = 2
+R_ANAL_OP_PREFIX_REPNE = 4
+R_ANAL_OP_PREFIX_LOCK = 8
+R_ANAL_OP_PREFIX_LIKELY = 16
+R_ANAL_OP_PREFIX_UNLIKELY = 32
+c__EA_RAnalOpPrefix = ctypes.c_uint32 # enum
+
 # values for enumeration 'r_anal_data_type_t'
 r_anal_data_type_t__enumvalues = {
     0: 'R_ANAL_DATATYPE_NULL',
@@ -2115,23 +2132,6 @@ R_ANAL_COND_VC = 13
 R_ANAL_COND_HI = 14
 R_ANAL_COND_LS = 15
 c__EA__RAnalCond = ctypes.c_uint32 # enum
-
-# values for enumeration 'c__EA_RAnalOpPrefix'
-c__EA_RAnalOpPrefix__enumvalues = {
-    1: 'R_ANAL_OP_PREFIX_COND',
-    2: 'R_ANAL_OP_PREFIX_REP',
-    4: 'R_ANAL_OP_PREFIX_REPNE',
-    8: 'R_ANAL_OP_PREFIX_LOCK',
-    16: 'R_ANAL_OP_PREFIX_LIKELY',
-    32: 'R_ANAL_OP_PREFIX_UNLIKELY',
-}
-R_ANAL_OP_PREFIX_COND = 1
-R_ANAL_OP_PREFIX_REP = 2
-R_ANAL_OP_PREFIX_REPNE = 4
-R_ANAL_OP_PREFIX_LOCK = 8
-R_ANAL_OP_PREFIX_LIKELY = 16
-R_ANAL_OP_PREFIX_UNLIKELY = 32
-c__EA_RAnalOpPrefix = ctypes.c_uint32 # enum
 class struct_c__SA_RStrBuf(Structure):
     pass
 
@@ -2463,6 +2463,17 @@ struct_r_interval_node_t._fields_ = [
 ]
 
 
+# values for enumeration 'PJEncodingNum'
+PJEncodingNum__enumvalues = {
+    0: 'PJ_ENCODING_NUM_DEFAULT',
+    1: 'PJ_ENCODING_NUM_STR',
+    2: 'PJ_ENCODING_NUM_HEX',
+}
+PJ_ENCODING_NUM_DEFAULT = 0
+PJ_ENCODING_NUM_STR = 1
+PJ_ENCODING_NUM_HEX = 2
+PJEncodingNum = ctypes.c_uint32 # enum
+
 # values for enumeration 'PJEncodingStr'
 PJEncodingStr__enumvalues = {
     0: 'PJ_ENCODING_STR_DEFAULT',
@@ -2477,17 +2488,6 @@ PJ_ENCODING_STR_HEX = 2
 PJ_ENCODING_STR_ARRAY = 3
 PJ_ENCODING_STR_STRIP = 4
 PJEncodingStr = ctypes.c_uint32 # enum
-
-# values for enumeration 'PJEncodingNum'
-PJEncodingNum__enumvalues = {
-    0: 'PJ_ENCODING_NUM_DEFAULT',
-    1: 'PJ_ENCODING_NUM_STR',
-    2: 'PJ_ENCODING_NUM_HEX',
-}
-PJ_ENCODING_NUM_DEFAULT = 0
-PJ_ENCODING_NUM_STR = 1
-PJ_ENCODING_NUM_HEX = 2
-PJEncodingNum = ctypes.c_uint32 # enum
 struct_pj_t._pack_ = 1 # source:False
 struct_pj_t._fields_ = [
     ('sb', struct_c__SA_RStrBuf),

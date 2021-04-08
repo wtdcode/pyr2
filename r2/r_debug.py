@@ -2920,10 +2920,10 @@ struct_pj_t._fields_ = [
     ('num_encoding', PJEncodingNum),
 ]
 
-class struct_r_egg_emit_t(Structure):
+class struct_r_asm_t(Structure):
     pass
 
-class struct_r_asm_t(Structure):
+class struct_r_egg_emit_t(Structure):
     pass
 
 class struct_r_egg_lang_t(Structure):
